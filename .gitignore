@@ -1,0 +1,26 @@
+# Eclipse specific files
+/.settings/
+/.project
+/.classpath
+
+# Maven specific directories
+/target/
+
+# Ignore log files
+*.log
+
+# Ignore temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+*.~*
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE-specific files (for IntelliJ IDEA, if used in addition to Eclipse)
+/.idea/
+/*.iml
+/bin/
