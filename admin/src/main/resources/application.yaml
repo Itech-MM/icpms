@@ -1,3 +1,42 @@
 spring:
   application:
     name: admin
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/icpms?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: true
+
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+server:
+  port: 8081
+  servlet:
+    context-path: /
+
+image:
+  path: D:/FlexiTech/Company Data/Projects/ICPMS/images
+  context:
+    path: icpms-images
+
+logging:
+  level:
+    org.flexitech.projects.icpms: DEBUG

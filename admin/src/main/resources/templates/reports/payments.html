@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<body>
+<div layout:fragment="content">
+
+    <h4 class="mb-3">Payment Report</h4>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <form th:action="@{/reports/payments}" method="get" class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label small">Plate Number</label>
+                    <input type="text" name="plateNumber" class="form-control form-control-sm" th:value="${searchDTO.plateNumber}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">Method</label>
+                    <select name="method" class="form-select form-select-sm">
+                        <option value="">-- All --</option>
+                        <option th:each="m : ${methods}" th:value="${m.code}" th:text="${m.desc}"
+                                th:selected="${searchDTO.method != null and searchDTO.method == m.code}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">-- All --</option>
+                        <option th:each="s : ${statuses}" th:value="${s.code}" th:text="${s.desc}"
+                                th:selected="${searchDTO.status != null and searchDTO.status == s.code}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">From Date</label>
+                    <input type="date" name="fromDate" class="form-control form-control-sm" th:value="${searchDTO.fromDate}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">To Date</label>
+                    <input type="date" name="toDate" class="form-control form-control-sm" th:value="${searchDTO.toDate}">
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-outline-primary btn-sm w-100"><i class="bi bi-search"></i></button>
+                </div>
+                <div class="col-md-1">
+                    <a th:href="@{/reports/payments}" class="btn btn-outline-secondary btn-sm w-100">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <span class="text-muted small" th:text="${result.totalRecords} + ' payment(s) found'"></span>
+            <span class="fs-5 fw-bold text-success">
+                Total: RM <span th:text="${#numbers.formatDecimal(totalAmount, 1, 2)}">0.00</span>
+            </span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Plate No.</th>
+                            <th>Site</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Payment Time</th>
+                            <th>Reference No.</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="payment : ${result.results}">
+                            <td th:text="${payment.id}"></td>
+                            <td th:text="${payment.plateNumber}"></td>
+                            <td th:text="${payment.siteName}"></td>
+                            <td th:text="${#numbers.formatDecimal(payment.amount, 1, 2)}"></td>
+                            <td th:text="${payment.methodDesc}"></td>
+                            <td th:text="${payment.paymentTime}"></td>
+                            <td th:text="${payment.referenceNo}"></td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${payment.status == 1} ? 'bg-success' : (${payment.status == 2} ? 'bg-warning text-dark' : 'bg-secondary')"
+                                      th:text="${payment.statusDesc}"></span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(result.results)}">
+                            <td colspan="8" class="text-center text-muted py-4">No payments found for the selected criteria.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:replace="~{fragments/pagination :: pager(${result}, ${pageUrlPrefix})}"></div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

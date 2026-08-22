@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0" th:text="'Devices: ' + ${gate.name}"></h4>
+            <small class="text-muted" th:text="${gate.siteName} + ' — ' + ${gate.typeDesc} + ' gate'"></small>
+        </div>
+        <a th:href="@{/gates}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to Gates</a>
+    </div>
+
+    <div th:if="${gate.type == 3}" class="alert alert-info py-2 small">
+        <i class="bi bi-info-circle"></i> This is a <strong>Both (Entry/Exit)</strong> gate — it may need separate
+        devices per direction (e.g. an entry-side camera and an exit-side camera). Use the <em>Direction</em> field
+        below to tag each device accordingly, or leave it as "Both" if a single device serves both directions.
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <strong>Attached Devices</strong>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Name</th>
+                                    <th>Direction</th>
+                                    <th>IP : Port</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="device : ${devices}">
+                                    <td th:text="${device.deviceTypeDesc}"></td>
+                                    <td th:text="${device.name}"></td>
+                                    <td th:text="${device.directionDesc} ?: '-'"></td>
+                                    <td>
+                                        <span class="text-monospace" th:text="${device.ipAddress}"></span><span th:if="${device.port}" th:text="':' + ${device.port}"></span>
+                                    </td>
+                                    <td>
+                                        <span class="badge" th:classappend="${device.status == 1} ? 'bg-success' : 'bg-secondary'" th:text="${device.statusDesc}"></span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a th:href="@{/gates/{gateId}/devices(gateId=${gate.id}, editId=${device.id})}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                        <form th:action="@{'/gates/' + ${gate.id} + '/devices/' + ${device.id} + '/delete'}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Delete this device?"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(devices)}">
+                                    <td colspan="6" class="text-center text-muted py-3">No devices attached to this gate yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <strong th:text="${deviceDTO.id != null} ? 'Edit Device' : 'Add Device'"></strong>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{'/gates/' + ${gate.id} + '/devices/save'}" th:object="${deviceDTO}" method="post" class="row g-3">
+                        <input type="hidden" th:field="*{id}">
+                        <input type="hidden" th:field="*{gateId}">
+
+                        <div class="col-12">
+                            <label class="form-label">Device Type <span class="text-danger">*</span></label>
+                            <select th:field="*{deviceType}" class="form-select" required>
+                                <option value="">-- Select Type --</option>
+                                <option th:each="t : ${deviceTypes}" th:value="${t.code}" th:text="${t.desc}"></option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Device Name <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{name}" class="form-control" placeholder="e.g. Entry Camera" required>
+                        </div>
+
+                        <div class="col-6">
+                            <label class="form-label">Direction</label>
+                            <select th:field="*{direction}" class="form-select">
+                                <option value="">-- N/A --</option>
+                                <option th:each="d : ${directions}" th:value="${d.code}" th:text="${d.desc}"></option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Status</label>
+                            <select th:field="*{status}" class="form-select">
+                                <option th:each="s : ${statuses}" th:value="${s.code}" th:text="${s.desc}"></option>
+                            </select>
+                        </div>
+
+                        <div class="col-8">
+                            <label class="form-label">IP Address <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{ipAddress}" class="form-control" placeholder="e.g. 192.168.1.20" required>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label">Port</label>
+                            <input type="number" min="0" max="65535" th:field="*{port}" class="form-control" placeholder="e.g. 8000">
+                        </div>
+
+                        <div class="col-6">
+                            <label class="form-label">Username</label>
+                            <input type="text" th:field="*{username}" class="form-control" placeholder="e.g. admin">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Password</label>
+                            <input type="password" th:field="*{password}" class="form-control"
+                                   th:placeholder="${deviceDTO.id != null} ? 'Leave blank to keep current' : 'Device password'">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Model / Vendor</label>
+                            <input type="text" th:field="*{model}" class="form-control" placeholder="e.g. Hikvision DS-TCG205">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Remarks</label>
+                            <textarea th:field="*{remarks}" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i>
+                                <span th:text="${deviceDTO.id != null} ? 'Update Device' : 'Add Device'"></span>
+                            </button>
+                            <a th:if="${deviceDTO.id != null}" th:href="@{'/gates/' + ${gate.id} + '/devices'}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0" th:text="${slotDTO.id != null} ? 'Edit Parking Slot' : 'New Parking Slot'"></h4>
+        <a th:href="@{/parking-slots}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to List</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+
+            <ul class="nav nav-tabs mb-3" id="slotFormTabs" role="tablist" th:if="${slotDTO.id == null}">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" th:classappend="${activeTab != 'bulk'} ? 'active'"
+                            id="single-tab" data-bs-toggle="tab" data-bs-target="#single-pane"
+                            type="button" role="tab">Single</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" th:classappend="${activeTab == 'bulk'} ? 'active'"
+                            id="bulk-tab" data-bs-toggle="tab" data-bs-target="#bulk-pane"
+                            type="button" role="tab">Bulk Create</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="slotFormTabsContent">
+
+                <!-- SINGLE FORM -->
+                <div class="tab-pane fade" th:classappend="${activeTab != 'bulk'} ? 'show active'"
+                     id="single-pane" role="tabpanel">
+                    <form th:action="@{/parking-slots/save}" th:object="${slotDTO}" method="post" class="row g-3">
+                        <input type="hidden" th:field="*{id}">
+
+                        <div class="col-md-6">
+                            <label class="form-label">Site <span class="text-danger">*</span></label>
+                            <select th:field="*{siteId}" class="form-select" required>
+                                <option value="">-- Select Site --</option>
+                                <option th:each="s : ${sites}" th:value="${s.id}" th:text="${s.name}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Slot Number <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{slotNumber}" class="form-control" required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Floor Level</label>
+                            <input type="text" th:field="*{floorLevel}" class="form-control" placeholder="e.g. Level 1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Status</label>
+                            <select th:field="*{status}" class="form-select">
+                                <option th:each="s : ${slotStatuses}" th:value="${s.code}" th:text="${s.desc}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div class="form-check">
+                                <input type="checkbox" th:field="*{isVip}" class="form-check-input" id="isVip">
+                                <label class="form-check-label" for="isVip">VIP Reserved Slot</label>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save</button>
+                            <a th:href="@{/parking-slots}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- BULK FORM -->
+                <div class="tab-pane fade" th:if="${slotDTO.id == null}"
+                     th:classappend="${activeTab == 'bulk'} ? 'show active'"
+                     id="bulk-pane" role="tabpanel">
+                    <form th:action="@{/parking-slots/bulk-save}" th:object="${bulkDTO}" method="post" class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label">Site <span class="text-danger">*</span></label>
+                            <select th:field="*{siteId}" class="form-select" required>
+                                <option value="">-- Select Site --</option>
+                                <option th:each="s : ${sites}" th:value="${s.id}" th:text="${s.name}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Slot Number Prefix</label>
+                            <input type="text" th:field="*{prefix}" class="form-control" placeholder="e.g. A-">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">From <span class="text-danger">*</span></label>
+                            <input type="number" min="1" th:field="*{fromNumber}" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">To <span class="text-danger">*</span></label>
+                            <input type="number" min="1" th:field="*{toNumber}" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Floor Level</label>
+                            <input type="text" th:field="*{floorLevel}" class="form-control" placeholder="e.g. Level 1">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Status</label>
+                            <select th:field="*{status}" class="form-select">
+                                <option th:each="s : ${slotStatuses}" th:value="${s.code}" th:text="${s.desc}"></option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div class="form-check">
+                                <input type="checkbox" th:field="*{isVip}" class="form-check-input" id="bulkIsVip">
+                                <label class="form-check-label" for="bulkIsVip">VIP Reserved Slot</label>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <small class="text-muted">
+                                Creates slots numbered prefix + from through prefix + to
+                                (e.g. prefix "A-", from 1, to 10 → A-1 … A-10).
+                            </small>
+                        </div>
+
+                        <div class="col-12 mt-2">
+                            <button type="submit" class="btn btn-primary"
+                                    data-confirm="This will create multiple parking slots. Continue?">
+                                <i class="bi bi-check-lg"></i> Create Slots
+                            </button>
+                            <a th:href="@{/parking-slots}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

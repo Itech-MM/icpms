@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0" th:text="${operatorDTO.id != null} ? 'Edit Operator' : 'New Operator'"></h4>
+        <a th:href="@{/operators}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to List</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form th:action="@{/operators/save}" th:object="${operatorDTO}" method="post" class="row g-3">
+                <input type="hidden" th:field="*{id}">
+
+                <div class="col-md-6">
+                    <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{name}" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Username <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{username}" class="form-control" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" th:field="*{phoneNumber}" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Password <span class="text-danger" th:if="${operatorDTO.id == null}">*</span>
+                    </label>
+                    <input type="password" th:field="*{password}" class="form-control"
+                           th:placeholder="${operatorDTO.id != null} ? 'Leave blank to keep current password' : 'Set a password'"
+                           th:required="${operatorDTO.id == null}">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Assigned Site</label>
+                    <select th:field="*{siteId}" class="form-select">
+                        <option value="">-- Not assigned --</option>
+                        <option th:each="s : ${sites}" th:value="${s.id}" th:text="${s.name}"></option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Role <span class="text-danger">*</span></label>
+                    <select th:field="*{role}" class="form-select" required>
+                        <option value="">-- Select Role --</option>
+                        <option th:each="r : ${operatorRoles}" th:value="${r.code}" th:text="${r.desc}"></option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Status</label>
+                    <select th:field="*{status}" class="form-select">
+                        <option th:each="s : ${statuses}" th:value="${s.code}" th:text="${s.desc}"></option>
+                    </select>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save</button>
+                    <a th:href="@{/operators}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

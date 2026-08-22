@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0" th:text="${memberDTO.id != null} ? 'Edit Member' : 'New Member'"></h4>
+        <a th:href="@{/members}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to List</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form th:action="@{/members/save}" th:object="${memberDTO}" method="post" class="row g-3">
+                <input type="hidden" th:field="*{id}">
+
+                <div class="col-md-6">
+                    <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{name}" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{phoneNumber}" class="form-control" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input type="email" th:field="*{email}" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Membership Type <span class="text-danger">*</span></label>
+                    <select th:field="*{membershipType}" class="form-select" required>
+                        <option value="">-- Select --</option>
+                        <option th:each="m : ${membershipTypes}" th:value="${m.code}" th:text="${m.desc}"></option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Membership Valid Until</label>
+                    <input type="date" th:field="*{validUntil}" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Reserved VIP Slot</label>
+                    <select th:field="*{reservedSlotId}" class="form-select">
+                        <option value="">-- None --</option>
+                        <option th:each="s : ${slots}" th:value="${s.id}" th:text="${s.siteName} + ' - ' + ${s.slotNumber}"></option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Status</label>
+                    <select th:field="*{status}" class="form-select">
+                        <option th:each="s : ${statuses}" th:value="${s.code}" th:text="${s.desc}"></option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-check mt-2">
+                        <input type="checkbox" th:field="*{isVip}" class="form-check-input" id="isVip">
+                        <label class="form-check-label" for="isVip">VIP Member</label>
+                    </div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save</button>
+                    <a th:href="@{/members}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

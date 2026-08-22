@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Operators</h4>
+        <a th:href="@{/operators/new}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Operator</a>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <form th:action="@{/operators}" method="get" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small">Name</label>
+                    <input type="text" name="name" class="form-control form-control-sm" th:value="${searchDTO.name}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Username</label>
+                    <input type="text" name="username" class="form-control form-control-sm" th:value="${searchDTO.username}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">Site</label>
+                    <select name="siteId" class="form-select form-select-sm">
+                        <option value="">-- All --</option>
+                        <option th:each="s : ${sites}" th:value="${s.id}" th:text="${s.name}"
+                                th:selected="${searchDTO.siteId != null and searchDTO.siteId == s.id}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary btn-sm w-100"><i class="bi bi-search"></i> Search</button>
+                </div>
+                <div class="col-md-2">
+                    <a th:href="@{/operators}" class="btn btn-outline-secondary btn-sm w-100">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Phone</th>
+                            <th>Site</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="operator : ${result.results}">
+                            <td th:text="${operator.id}"></td>
+                            <td th:text="${operator.name}"></td>
+                            <td th:text="${operator.username}"></td>
+                            <td th:text="${operator.phoneNumber}"></td>
+                            <td th:text="${operator.siteName} ?: '-'"></td>
+                            <td th:text="${operator.roleDesc}"></td>
+                            <td>
+                                <span class="badge" th:classappend="${operator.status == 1} ? 'bg-success' : 'bg-secondary'" th:text="${operator.statusDesc}"></span>
+                            </td>
+                            <td class="text-end">
+                                <a th:href="@{'/operators/' + ${operator.id} + '/edit'}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <form th:action="@{'/operators/' + ${operator.id} + '/delete'}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Delete this operator?"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(result.results)}">
+                            <td colspan="8" class="text-center text-muted py-4">No operators found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:replace="~{fragments/pagination :: pager(${result}, ${pageUrlPrefix})}"></div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

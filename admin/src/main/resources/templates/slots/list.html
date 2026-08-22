@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Parking Slots</h4>
+        <a th:href="@{/parking-slots/new}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Slot</a>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <form th:action="@{/parking-slots}" method="get" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small">Slot Number</label>
+                    <input type="text" name="slotNumber" class="form-control form-control-sm" th:value="${searchDTO.slotNumber}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Site</label>
+                    <select name="siteId" class="form-select form-select-sm">
+                        <option value="">-- All Sites --</option>
+                        <option th:each="s : ${sites}" th:value="${s.id}" th:text="${s.name}"
+                                th:selected="${searchDTO.siteId != null and searchDTO.siteId == s.id}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">-- All --</option>
+                        <option th:each="s : ${slotStatuses}" th:value="${s.code}" th:text="${s.desc}"
+                                th:selected="${searchDTO.status != null and searchDTO.status == s.code}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary btn-sm w-100"><i class="bi bi-search"></i> Search</button>
+                </div>
+                <div class="col-md-2">
+                    <a th:href="@{/parking-slots}" class="btn btn-outline-secondary btn-sm w-100">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Site</th>
+                            <th>Slot Number</th>
+                            <th>Floor</th>
+                            <th>VIP</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="slot : ${result.results}">
+                            <td th:text="${slot.id}"></td>
+                            <td th:text="${slot.siteName}"></td>
+                            <td th:text="${slot.slotNumber}"></td>
+                            <td th:text="${slot.floorLevel}"></td>
+                            <td>
+                                <span th:if="${slot.isVip}" class="badge bg-warning text-dark">VIP</span>
+                                <span th:unless="${slot.isVip}" class="text-muted">-</span>
+                            </td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${slot.status == 1} ? 'bg-success' : (${slot.status == 2} ? 'bg-danger' : (${slot.status == 3} ? 'bg-info text-dark' : 'bg-secondary'))"
+                                      th:text="${slot.statusDesc}"></span>
+                            </td>
+                            <td class="text-end">
+                                <a th:href="@{'/parking-slots/' + ${slot.id} + '/edit'}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <form th:action="@{'/parking-slots/' + ${slot.id} + '/delete'}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Delete this slot?"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(result.results)}">
+                            <td colspan="7" class="text-center text-muted py-4">No parking slots found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:replace="~{fragments/pagination :: pager(${result}, ${pageUrlPrefix})}"></div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

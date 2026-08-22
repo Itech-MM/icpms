@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Admin Users</h4>
+        <a th:href="@{/users/new}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add User</a>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <form th:action="@{/users}" method="get" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small">Name</label>
+                    <input type="text" name="name" class="form-control form-control-sm" th:value="${searchDTO.name}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small">Phone Number</label>
+                    <input type="text" name="phoneNumber" class="form-control form-control-sm" th:value="${searchDTO.phoneNumber}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary btn-sm w-100"><i class="bi bi-search"></i> Search</button>
+                </div>
+                <div class="col-md-2">
+                    <a th:href="@{/users}" class="btn btn-outline-secondary btn-sm w-100">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Phone Number</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user : ${result.results}">
+                            <td th:text="${user.id}"></td>
+                            <td th:text="${user.name}"></td>
+                            <td th:text="${user.phoneNumber}"></td>
+                            <td th:text="${user.role != null ? user.role.name : '-'}"></td>
+                            <td>
+                                <span class="badge" th:classappend="${user.status == 1} ? 'bg-success' : 'bg-secondary'" th:text="${user.statusDesc}"></span>
+                            </td>
+                            <td class="text-end">
+                                <a th:href="@{'/users/' + ${user.id} + '/edit'}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <form th:action="@{'/users/' + ${user.id} + '/delete'}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Delete this user?"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(result.results)}">
+                            <td colspan="6" class="text-center text-muted py-4">No users found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:replace="~{fragments/pagination :: pager(${result}, ${pageUrlPrefix})}"></div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

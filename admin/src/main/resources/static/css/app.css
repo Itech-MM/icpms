@@ -1,0 +1,110 @@
+:root {
+    --sidebar-width: 240px;
+    --brand-color: #0d6efd;
+}
+
+body {
+    background-color: #f4f6f9;
+}
+
+#wrapper {
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: var(--sidebar-width);
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+}
+
+.sidebar-brand {
+    padding: 1rem 1.25rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.sidebar .nav-heading {
+    padding: .85rem 1.25rem .25rem;
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: rgba(255,255,255,.4);
+}
+
+.sidebar .nav-link {
+    color: rgba(255,255,255,.75);
+    padding: .55rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    font-size: .92rem;
+    border-left: 3px solid transparent;
+}
+
+.sidebar .nav-link:hover {
+    color: #fff;
+    background-color: rgba(255,255,255,.05);
+}
+
+.sidebar .nav-link.active {
+    color: #fff;
+    background-color: rgba(13,110,253,.25);
+    border-left-color: var(--brand-color);
+    font-weight: 600;
+}
+
+.top-navbar {
+    background-color: #fff;
+    border-bottom: 1px solid #e6e8ec;
+    padding: .6rem 0;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+
+.stat-card {
+    border-radius: .6rem;
+    color: #fff;
+    padding: 1.25rem;
+}
+
+.stat-card .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.stat-card .stat-icon {
+    font-size: 2.2rem;
+    opacity: .5;
+}
+
+.table thead th {
+    background-color: #f1f3f6;
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: #6b7280;
+    border-bottom-width: 1px;
+}
+
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0d6efd 0%, #084298 100%);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 380px;
+    border-radius: .75rem;
+}

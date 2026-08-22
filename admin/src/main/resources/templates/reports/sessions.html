@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<body>
+<div layout:fragment="content">
+
+    <h4 class="mb-3">Parking Session Report</h4>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <form th:action="@{/reports/parking-sessions}" method="get" class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label small">Plate Number</label>
+                    <input type="text" name="plateNumber" class="form-control form-control-sm" th:value="${searchDTO.plateNumber}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">Site</label>
+                    <select name="siteId" class="form-select form-select-sm">
+                        <option value="">-- All --</option>
+                        <option th:each="s : ${sites}" th:value="${s.id}" th:text="${s.name}"
+                                th:selected="${searchDTO.siteId != null and searchDTO.siteId == s.id}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">-- All --</option>
+                        <option th:each="s : ${statuses}" th:value="${s.code}" th:text="${s.desc}"
+                                th:selected="${searchDTO.status != null and searchDTO.status == s.code}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">From Date</label>
+                    <input type="date" name="fromDate" class="form-control form-control-sm" th:value="${searchDTO.fromDate}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">To Date</label>
+                    <input type="date" name="toDate" class="form-control form-control-sm" th:value="${searchDTO.toDate}">
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-outline-primary btn-sm w-100"><i class="bi bi-search"></i></button>
+                </div>
+                <div class="col-md-1">
+                    <a th:href="@{/reports/parking-sessions}" class="btn btn-outline-secondary btn-sm w-100">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted small" th:text="${result.totalRecords} + ' session(s) found'"></span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Plate No.</th>
+                            <th>Site</th>
+                            <th>Entry Gate</th>
+                            <th>Exit Gate</th>
+                            <th>Slot</th>
+                            <th>Tariff</th>
+                            <th>Entry Time</th>
+                            <th>Exit Time</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="session : ${result.results}">
+                            <td th:text="${session.id}"></td>
+                            <td th:text="${session.plateNumber}"></td>
+                            <td th:text="${session.siteName}"></td>
+                            <td th:text="${session.entryGateName}"></td>
+                            <td th:text="${session.exitGateName} ?: '-'"></td>
+                            <td th:text="${session.parkingSlotNumber} ?: '-'"></td>
+                            <td th:text="${session.tariffName}"></td>
+                            <td th:text="${session.entryTime}"></td>
+                            <td th:text="${session.exitTime} ?: '-'"></td>
+                            <td th:text="${session.totalAmount} ?: '-'"></td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${session.status == 1} ? 'bg-warning text-dark' : (${session.status == 2} ? 'bg-success' : 'bg-secondary')"
+                                      th:text="${session.statusDesc}"></span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(result.results)}">
+                            <td colspan="11" class="text-center text-muted py-4">No parking sessions found for the selected criteria.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:replace="~{fragments/pagination :: pager(${result}, ${pageUrlPrefix})}"></div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
