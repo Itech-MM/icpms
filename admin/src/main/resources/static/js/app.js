@@ -1,11 +1,16 @@
 $(function () {
     $('#sidebarToggle').on('click', function () {
-        $('#sidebar').toggleClass('d-none');
+        $('#sidebar').addClass('show');
+        $('#sidebarBackdrop').addClass('show');
+    });
+
+    $('#sidebarClose, #sidebarBackdrop').on('click', function () {
+        $('#sidebar').removeClass('show');
+        $('#sidebarBackdrop').removeClass('show');
     });
 
     $(document).on('click', '[data-confirm]', function (e) {
         e.preventDefault();
-
         var $el = $(this);
         var message = $el.data('confirm') || 'Are you sure?';
 
@@ -33,7 +38,9 @@ $(function () {
                         }
                     }
                 },
-                cancel: { text: 'No' }
+                cancel: {
+                    text: 'No'
+                }
             }
         });
     });

@@ -38,7 +38,7 @@ public class AuthUser implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getPhoneNumber();
+        return user.getName();
     }
 
     // implement other UserDetails methods

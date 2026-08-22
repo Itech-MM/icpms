@@ -8,37 +8,37 @@
 
     <div class="row g-3 mb-4">
         <div class="col-md-3 col-sm-6">
-            <div class="stat-card d-flex justify-content-between align-items-center" style="background-color:#0d6efd;">
+            <div class="stat-card d-flex justify-content-between align-items-center">
                 <div>
                     <div class="stat-value" th:text="${stats.totalSites}">0</div>
-                    <div>Total Sites</div>
+                    <div class="stat-label">Total Sites</div>
                 </div>
                 <i class="bi bi-buildings stat-icon"></i>
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
-            <div class="stat-card d-flex justify-content-between align-items-center" style="background-color:#198754;">
+            <div class="stat-card variant-success d-flex justify-content-between align-items-center">
                 <div>
                     <div class="stat-value" th:text="${stats.availableSlots} + ' / ' + ${stats.totalSlots}">0</div>
-                    <div>Available Slots</div>
+                    <div class="stat-label">Available Slots</div>
                 </div>
                 <i class="bi bi-grid-3x3-gap stat-icon"></i>
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
-            <div class="stat-card d-flex justify-content-between align-items-center" style="background-color:#fd7e14;">
+            <div class="stat-card variant-warning d-flex justify-content-between align-items-center">
                 <div>
                     <div class="stat-value" th:text="${stats.activeSessions}">0</div>
-                    <div>Active Sessions</div>
+                    <div class="stat-label">Active Sessions</div>
                 </div>
                 <i class="bi bi-car-front-fill stat-icon"></i>
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
-            <div class="stat-card d-flex justify-content-between align-items-center" style="background-color:#6f42c1;">
+            <div class="stat-card variant-purple d-flex justify-content-between align-items-center">
                 <div>
                     <div class="stat-value">RM <span th:text="${#numbers.formatDecimal(stats.todayRevenue, 1, 2)}">0.00</span></div>
-                    <div>Today's Revenue</div>
+                    <div class="stat-label">Today's Revenue</div>
                 </div>
                 <i class="bi bi-cash-stack stat-icon"></i>
             </div>
