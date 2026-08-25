@@ -11,10 +11,12 @@ import org.flexitech.projects.icpms.dto.gate.GateDTO;
 import org.flexitech.projects.icpms.dto.gate.GateSearchDTO;
 import org.flexitech.projects.icpms.persistence.entities.gate.Gate;
 import org.flexitech.projects.icpms.persistence.entities.site.Site;
+import org.flexitech.projects.icpms.persistence.entities.tariff.Tariff;
 import org.flexitech.projects.icpms.persistence.entities.user.User;
 import org.flexitech.projects.icpms.persistence.repositories.gate.GateDeviceRepository;
 import org.flexitech.projects.icpms.persistence.repositories.gate.GateRepository;
 import org.flexitech.projects.icpms.persistence.repositories.site.SiteRepository;
+import org.flexitech.projects.icpms.persistence.repositories.tariff.TariffRepository;
 import org.flexitech.projects.icpms.service.auth.AuthenticationService;
 import org.flexitech.projects.icpms.service.specifications.gate.GateSpecification;
 import org.springframework.data.domain.Page;
@@ -31,13 +33,15 @@ public class GateServiceImpl implements GateService {
 	private final SiteRepository siteRepository;
 	private final GateDeviceRepository gateDeviceRepository;
 	private final AuthenticationService authenticationService;
+	private final TariffRepository tariffRepository;
 
 	public GateServiceImpl(GateRepository gateRepository, SiteRepository siteRepository,
-			GateDeviceRepository gateDeviceRepository, AuthenticationService authenticationService) {
+			GateDeviceRepository gateDeviceRepository, AuthenticationService authenticationService, TariffRepository tariffRepository) {
 		this.gateRepository = gateRepository;
 		this.siteRepository = siteRepository;
 		this.gateDeviceRepository = gateDeviceRepository;
 		this.authenticationService = authenticationService;
+		this.tariffRepository = tariffRepository;
 	}
 
 	@Override
@@ -60,6 +64,12 @@ public class GateServiceImpl implements GateService {
 		gate.setStatus(CommonValidators.isValidObject(dto.getStatus()) ? dto.getStatus() : ActiveStatus.ACTIVE.getCode());
 
 		gate.setGateIpAddress(dto.getGateIpAddress());
+		
+		if(CommonValidators.validLong(dto.getTariffId())) {
+			Tariff t = this.tariffRepository.findById(dto.getTariffId())
+					.orElseThrow(() -> new EntityNotFoundException("Tariff doesn't exist!"));
+			gate.setTariff(t);
+		}
 		
 		if (CommonValidators.validLong(dto.getSiteId())) {
 			Site site = this.siteRepository.findById(dto.getSiteId())

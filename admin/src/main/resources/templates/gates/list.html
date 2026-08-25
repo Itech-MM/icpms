@@ -53,6 +53,8 @@
                             <th>Name</th>
                             <th>Code</th>
                             <th>Type</th>
+                            <th>IP Address</th>
+                            <th>Tariff</th>
                             <th>Status</th>
                             <th class="text-end">Actions</th>
                         </tr>
@@ -64,11 +66,20 @@
                             <td th:text="${gate.name}"></td>
                             <td th:text="${gate.code}"></td>
                             <td th:text="${gate.typeDesc}"></td>
+                           
+                            
+                            <td th:text="${gate.gateIpAddress}"></td>
+                            
                             <td>
+                             	<span class="badge bg-secondary" th:text="${gate.tariffName}"></span>
+                            </td>
+                            
+                             <td>
                                 <span class="badge" th:classappend="${gate.status == 1} ? 'bg-success' : 'bg-secondary'" th:text="${gate.statusDesc}"></span>
                             </td>
+                            
                             <td class="text-end">
-                                <a th:href="@{'/gates/' + ${gate.id} + '/devices'}" class="btn btn-sm btn-outline-secondary" title="Manage Devices"><i class="bi bi-hdd-network"></i> Devices</a>
+                                <a th:href="@{'/gates/' + ${gate.id} + '/devices'}" class="btn btn-sm btn-outline-secondary" title="Manage Devices"><i class="bi bi-hdd-network"></i></a>
                                 <a th:href="@{'/gates/' + ${gate.id} + '/edit'}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
                                 <form th:action="@{'/gates/' + ${gate.id} + '/delete'}" method="post" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Delete this gate and all its devices?"><i class="bi bi-trash"></i></button>

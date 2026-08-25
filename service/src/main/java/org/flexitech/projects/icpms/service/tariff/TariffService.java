@@ -1,5 +1,6 @@
 package org.flexitech.projects.icpms.service.tariff;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
@@ -18,4 +19,6 @@ public interface TariffService {
 	TariffRateDTO addRate(TariffRateDTO dto) throws Exception;
 	boolean deleteRate(Long rateId) throws Exception;
 	List<TariffRateDTO> getRates(Long tariffId);
+
+	BigDecimal calculateFee(Long tariffId, long durationMinutes) throws Exception;
 }

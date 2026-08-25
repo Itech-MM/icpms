@@ -7,6 +7,7 @@ import org.flexitech.projects.icpms.common.TableNames;
 import org.flexitech.projects.icpms.persistence.BasedEntity;
 import org.flexitech.projects.icpms.persistence.entities.gate.Gate;
 import org.flexitech.projects.icpms.persistence.entities.operator.Operator;
+import org.flexitech.projects.icpms.persistence.entities.operator.OperatorShift;
 import org.flexitech.projects.icpms.persistence.entities.slot.ParkingSlot;
 import org.flexitech.projects.icpms.persistence.entities.tariff.Tariff;
 import org.flexitech.projects.icpms.persistence.entities.vehicle.Vehicle;
@@ -70,4 +71,12 @@ public class ParkingSession extends BasedEntity {
 
 	/** ParkingSessionStatus enum code: 1=Active, 2=Completed, 3=Cancelled */
 	private Integer status = 1;
+
+	@ManyToOne
+	@JoinColumn(name = "entry_shift_id", nullable = false)
+	private OperatorShift entryShift;
+
+	@ManyToOne
+	@JoinColumn(name = "exit_shift_id")
+	private OperatorShift exitShift;
 }

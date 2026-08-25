@@ -3,6 +3,7 @@ package org.flexitech.projects.icpms.persistence.entities.gate;
 import org.flexitech.projects.icpms.common.TableNames;
 import org.flexitech.projects.icpms.persistence.BasedEntity;
 import org.flexitech.projects.icpms.persistence.entities.site.Site;
+import org.flexitech.projects.icpms.persistence.entities.tariff.Tariff;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,6 +31,10 @@ public class Gate extends BasedEntity {
 
 	private Integer status = 1;
 	
-	@Column(name ="gate_ip_address")
+	@Column(name ="gate_ip_address", unique = true)
 	private String gateIpAddress;
+	
+	@ManyToOne
+	@JoinColumn(name = "tariff_id")
+	private Tariff tariff;
 }

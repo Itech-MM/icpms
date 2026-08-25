@@ -4,6 +4,7 @@ import org.flexitech.projects.icpms.common.CommonValidators;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
 import org.flexitech.projects.icpms.common.enums.GateType;
 import org.flexitech.projects.icpms.dto.CommonDTO;
+import org.flexitech.projects.icpms.dto.tariff.TariffDTO;
 import org.flexitech.projects.icpms.persistence.entities.gate.Gate;
 
 import jakarta.validation.constraints.NotBlank;
@@ -31,6 +32,10 @@ public class GateDTO extends CommonDTO {
 	private Integer status = 1;
 	private String statusDesc;
 	private String gateIpAddress;
+	
+	private TariffDTO tariff;
+	private Long tariffId;
+	private String tariffName;
 
 	public GateDTO(Gate gate) {
 		super(gate);
@@ -45,5 +50,12 @@ public class GateDTO extends CommonDTO {
 		this.status = gate.getStatus();
 		this.statusDesc = ActiveStatus.getDescByCode(status);
 		this.gateIpAddress = gate.getGateIpAddress();
+		
+		if(gate.getTariff() != null) {
+			this.tariff = new TariffDTO(gate.getTariff());
+			this.tariffId = gate.getTariff().getId();
+			this.tariffName = gate.getTariff().getName();
+		}
+		
 	}
 }

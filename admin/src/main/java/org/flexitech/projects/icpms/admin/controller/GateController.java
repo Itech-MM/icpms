@@ -8,6 +8,7 @@ import org.flexitech.projects.icpms.dto.gate.GateDTO;
 import org.flexitech.projects.icpms.dto.gate.GateSearchDTO;
 import org.flexitech.projects.icpms.service.gate.GateService;
 import org.flexitech.projects.icpms.service.site.SiteService;
+import org.flexitech.projects.icpms.service.tariff.TariffService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,10 +25,12 @@ public class GateController {
 
 	private final GateService gateService;
 	private final SiteService siteService;
+	private final TariffService tariffService;
 
-	public GateController(GateService gateService, SiteService siteService) {
+	public GateController(GateService gateService, SiteService siteService, TariffService tariffService) {
 		this.gateService = gateService;
 		this.siteService = siteService;
+		this.tariffService = tariffService;
 	}
 
 	@GetMapping
@@ -77,6 +80,8 @@ public class GateController {
 		model.addAttribute("gateTypes", GateType.getAll());
 		model.addAttribute("sites", siteService.findAllActiveSites());
 		model.addAttribute("activeMenu", "gates");
+		model.addAttribute("tariffList", this.tariffService.findAllActiveTariffs());
+
 	}
 
 	@PostMapping("/save")

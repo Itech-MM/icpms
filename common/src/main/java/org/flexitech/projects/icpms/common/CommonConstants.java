@@ -27,13 +27,6 @@ public class CommonConstants {
 	public static final String FORM_SUCCESS_MESSAGE = "successMsg";
 	public static final String PAGE_ERROR_MESSAGE = "pageError";
 	
-	public static final String CUSTOMER_ROLE = "ROLE_CUSTOMER";
-	
-	
-	/* URL */
-	public static final String CUSTOMER_ORDER_URL = "/customer/orders/";
-	
-	public static final String QR_ENTITY_TYPE = "content-share-qr";
-	public static final int QR_SIZE = 300;
+	public static final String GATE_IP_HEADER = "gate-ip";
 
 }

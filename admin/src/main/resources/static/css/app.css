@@ -33,12 +33,18 @@ body {
     background-color: var(--bg);
     color: var(--text);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
 }
 
 #wrapper {
     min-height: 100vh;
+    width: 100%;
 }
-
+@media (min-width: 992px) {
+    #page-content-wrapper {
+        width: calc(100vw - var(--sidebar-width));
+    }
+}
 .sidebar {
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
@@ -181,6 +187,7 @@ body {
 
 .content-area {
     padding: 1rem;
+    min-width: 0;
 }
 
 @media (min-width: 992px) {
@@ -188,7 +195,6 @@ body {
         padding: 1.75rem 2rem;
     }
 }
-
 .card {
     border: none;
     border-radius: var(--radius);
@@ -309,6 +315,7 @@ body {
 .table-responsive {
     border-radius: var(--radius);
     -webkit-overflow-scrolling: touch;
+    width: 100%;
 }
 
 .badge {

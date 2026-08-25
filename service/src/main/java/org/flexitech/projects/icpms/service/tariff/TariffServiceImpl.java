@@ -1,5 +1,6 @@
 package org.flexitech.projects.icpms.service.tariff;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -110,12 +111,10 @@ public class TariffServiceImpl implements TariffService {
 	@Override
 	public TariffRateDTO addRate(TariffRateDTO dto) throws Exception {
 		TariffRate rate;
-		System.out.println("Tarif rate id:: " + dto.getId());
-		/*
-		 * if (CommonValidators.validLong(dto.getId())) { rate =
-		 * this.tariffRateRepository.findById(dto.getId()) .orElseThrow(() -> new
-		 * EntityNotFoundException("Tariff rate doesn't exist!")); } else
-		 */{
+		if (CommonValidators.validLong(dto.getId())) {
+			rate = this.tariffRateRepository.findById(dto.getId())
+					.orElseThrow(() -> new EntityNotFoundException("Tariff rate doesn't exist!"));
+		} else {
 			rate = new TariffRate();
 			rate.setCreatedTime(new Date());
 			Tariff tariff = this.tariffRepository.findById(dto.getTariffId())
@@ -142,5 +141,23 @@ public class TariffServiceImpl implements TariffService {
 	public List<TariffRateDTO> getRates(Long tariffId) {
 		return this.tariffRateRepository.findByTariffIdOrderByFromMinuteAsc(tariffId)
 				.stream().map(TariffRateDTO::new).collect(Collectors.toList());
+	}
+
+	@Override
+	public BigDecimal calculateFee(Long tariffId, long durationMinutes) throws Exception {
+		List<TariffRate> rates = this.tariffRateRepository.findByTariffIdOrderByFromMinuteAsc(tariffId);
+		if (rates.isEmpty()) {
+			throw new EntityNotFoundException("This tariff has no rate bands configured yet.");
+		}
+
+		for (TariffRate rate : rates) {
+			boolean pastStart = rate.getFromMinute() == null || durationMinutes >= rate.getFromMinute();
+			boolean withinEnd = rate.getToMinute() == null || durationMinutes <= rate.getToMinute();
+			if (pastStart && withinEnd) {
+				return rate.getAmount();
+			}
+		}
+
+		return rates.get(rates.size() - 1).getAmount();
 	}
 }

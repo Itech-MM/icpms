@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: api
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/icpms?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: 8080
+  servlet:
+    context-path: /icpms-api
+
+image:
+  path: D:/FlexiTech/Company Data/Projects/ICPMS/images
+  context:
+    path: icpms-images
+
+app:
+  jwt:
+    secret: c2VjdXJlLXNlY3JldC1rZXktZm9yLWljcG1zLWFwaS1hdC1sZWFzdC01MTItYml0cy1sb25nLWZvci1oczUxMi1zaWduaW5n
+    expiration-ms: 3600000
+    refresh-expiration-ms: 604800000
+    issuer: icpms-api
+
+logging:
+  level:
+    org.flexitech.projects.icpms: DEBUG
+    org.springframework.security: INFO

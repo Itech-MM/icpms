@@ -11,4 +11,6 @@ public interface PaymentService {
 	SearchResultDTO<PaymentDTO> searchPayments(PaymentSearchDTO searchDTO, Pageable pageable) throws Exception;
 	PaymentDTO getPaymentById(Long id) throws Exception;
 	BigDecimal sumAmount(PaymentSearchDTO searchDTO);
+
+	PaymentDTO recordPayment(Long sessionId, BigDecimal amount, Integer method, String referenceNo) throws Exception;
 }

@@ -1,5 +1,7 @@
 package org.flexitech.projects.icpms.service.vehicle;
 
+import java.util.Optional;
+
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
 import org.flexitech.projects.icpms.dto.vehicle.VehicleDTO;
 import org.flexitech.projects.icpms.dto.vehicle.VehicleSearchDTO;
@@ -10,4 +12,8 @@ public interface VehicleService {
 	VehicleDTO getVehicleById(Long id) throws Exception;
 	SearchResultDTO<VehicleDTO> searchVehicles(VehicleSearchDTO searchDTO, Pageable pageable) throws Exception;
 	boolean deleteVehicle(Long id) throws Exception;
+
+	Optional<VehicleDTO> findByPlateNumber(String plateNumber);
+
+	VehicleDTO findOrCreateByPlateNumber(String plateNumber, String vehicleType) throws Exception;
 }

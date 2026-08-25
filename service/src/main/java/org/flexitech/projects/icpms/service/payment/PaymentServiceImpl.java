@@ -1,13 +1,17 @@
 package org.flexitech.projects.icpms.service.payment;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.stream.Collectors;
 
+import org.flexitech.projects.icpms.common.enums.PaymentStatus;
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
 import org.flexitech.projects.icpms.dto.payment.PaymentDTO;
 import org.flexitech.projects.icpms.dto.payment.PaymentSearchDTO;
 import org.flexitech.projects.icpms.persistence.entities.payment.Payment;
+import org.flexitech.projects.icpms.persistence.entities.session.ParkingSession;
 import org.flexitech.projects.icpms.persistence.repositories.payment.PaymentRepository;
+import org.flexitech.projects.icpms.persistence.repositories.session.ParkingSessionRepository;
 import org.flexitech.projects.icpms.service.specifications.payment.PaymentSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,9 +24,11 @@ import jakarta.persistence.EntityNotFoundException;
 public class PaymentServiceImpl implements PaymentService {
 
 	private final PaymentRepository paymentRepository;
+	private final ParkingSessionRepository sessionRepository;
 
-	public PaymentServiceImpl(PaymentRepository paymentRepository) {
+	public PaymentServiceImpl(PaymentRepository paymentRepository, ParkingSessionRepository sessionRepository) {
 		this.paymentRepository = paymentRepository;
+		this.sessionRepository = sessionRepository;
 	}
 
 	@Override
@@ -55,5 +61,23 @@ public class PaymentServiceImpl implements PaymentService {
 				.map(Payment::getAmount)
 				.filter(a -> a != null)
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
+	}
+
+	@Override
+	public PaymentDTO recordPayment(Long sessionId, BigDecimal amount, Integer method, String referenceNo) throws Exception {
+		ParkingSession session = this.sessionRepository.findById(sessionId)
+				.orElseThrow(() -> new EntityNotFoundException("Parking session doesn't exist!"));
+
+		Payment payment = new Payment();
+		payment.setCreatedTime(new Date());
+		payment.setSession(session);
+		payment.setAmount(amount);
+		payment.setMethod(method);
+		payment.setPaymentTime(new Date());
+		payment.setReferenceNo(referenceNo);
+		payment.setStatus(PaymentStatus.PAID.getCode());
+
+		Payment saved = this.paymentRepository.save(payment);
+		return new PaymentDTO(saved);
 	}
 }

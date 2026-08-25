@@ -1,6 +1,7 @@
 package org.flexitech.projects.icpms.service.vehicle;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.flexitech.projects.icpms.common.CommonValidators;
@@ -95,5 +96,25 @@ public class VehicleServiceImpl implements VehicleService {
 				.orElseThrow(() -> new EntityNotFoundException("Vehicle doesn't exist!"));
 		this.vehicleRepository.delete(vehicle);
 		return true;
+	}
+
+	@Override
+	public Optional<VehicleDTO> findByPlateNumber(String plateNumber) {
+		return this.vehicleRepository.findByPlateNumberIgnoreCase(plateNumber).map(VehicleDTO::new);
+	}
+
+	@Override
+	public VehicleDTO findOrCreateByPlateNumber(String plateNumber, String vehicleType) throws Exception {
+		return this.vehicleRepository.findByPlateNumberIgnoreCase(plateNumber)
+				.map(VehicleDTO::new)
+				.orElseGet(() -> {
+					Vehicle vehicle = new Vehicle();
+					vehicle.setCreatedTime(new Date());
+					vehicle.setPlateNumber(plateNumber);
+					vehicle.setVehicleType(vehicleType);
+					vehicle.setStatus(ActiveStatus.ACTIVE.getCode());
+					Vehicle saved = this.vehicleRepository.save(vehicle);
+					return new VehicleDTO(saved);
+				});
 	}
 }
