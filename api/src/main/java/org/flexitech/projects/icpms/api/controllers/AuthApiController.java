@@ -17,6 +17,7 @@ import org.flexitech.projects.icpms.dto.api.response.auth.AuthResponseDTO;
 import org.flexitech.projects.icpms.dto.operator.OperatorShiftDTO;
 import org.flexitech.projects.icpms.service.operator.OperatorShiftService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,9 +25,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,14 +58,14 @@ public class AuthApiController {
 	}
 
 	@PostMapping("/login")
-	public ApiResponse<AuthResponseDTO> login(@Valid @RequestBody LoginRequestDTO request,
+	public ResponseEntity<ApiResponse<AuthResponseDTO>> login(@Valid @RequestBody LoginRequestDTO request,
 			HttpServletRequest httpRequest) {
 		Authentication authentication;
 		try {
 			authentication = authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 		} catch (BadCredentialsException e) {
-			return ApiResponse.error("Invalid username or password.");
+			return ApiResponse.internalError("Invalid username or password.");
 		}
 
 		OperatorPrincipal principal = (OperatorPrincipal) authentication.getPrincipal();
@@ -75,20 +78,62 @@ public class AuthApiController {
 		String refreshToken = jwtService.generateRefreshToken(principal.getUsername());
 
 		boolean startShift = needsShiftStart(principal, httpRequest);
+		
+		OperatorShiftDTO activeShift = null;
+		if(!startShift) {
+			String gateIpAddress = httpRequest.getHeader(CommonConstants.GATE_IP_HEADER);
+			activeShift = operatorShiftService.getActiveShiftByOperator(principal.getOperator().getId(), gateIpAddress);
+		}
 
 		AuthResponseDTO response = new AuthResponseDTO(accessToken, refreshToken, principal.getUsername(), roles,
-				jwtExpirationMs, startShift);
+				jwtExpirationMs, startShift, activeShift);
 
 		return ApiResponse.ok(response, "Login successful.");
 	}
+	
+	@GetMapping("/validate")
+	public ResponseEntity<ApiResponse<AuthResponseDTO>> validate(HttpServletRequest httpRequest, @RequestParam String token) {
+
+	    if (!jwtService.validateToken(token)) {
+	        return ApiResponse.badRequest("Token is invalid.");
+	    }
+
+	    if (jwtService.isRefreshToken(token)) {
+	        return ApiResponse.badRequest("Token is invalid.");
+	    }
+
+	    String username = jwtService.extractUsername(token);
+	    UserDetails userDetails;
+	    try {
+	        userDetails = operatorUserDetailsService.loadUserByUsername(username);
+	    } catch (Exception e) {
+	        return ApiResponse.internalError("Token is invalid.");
+	    }
+
+	    OperatorPrincipal principal = (OperatorPrincipal) userDetails;
+	    List<String> roles = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+
+	    boolean startShift = needsShiftStart(principal, httpRequest);
+
+	    OperatorShiftDTO activeShift = null;
+	    if (!startShift) {
+	        String gateIpAddress = httpRequest.getHeader(CommonConstants.GATE_IP_HEADER);
+	        activeShift = operatorShiftService.getActiveShiftByOperator(principal.getOperator().getId(), gateIpAddress);
+	    }
+
+	    AuthResponseDTO response = new AuthResponseDTO(token, null, principal.getUsername(), roles,
+	            jwtExpirationMs, startShift, activeShift);
+
+	    return ApiResponse.ok(response, "Token is valid.");
+	}
 
 	@PostMapping("/refresh")
-	public ApiResponse<AuthResponseDTO> refresh(@Valid @RequestBody RefreshTokenRequestDTO request,
+	public ResponseEntity<ApiResponse<AuthResponseDTO>> refresh(@Valid @RequestBody RefreshTokenRequestDTO request,
 			HttpServletRequest httpRequest) {
 		String token = request.getRefreshToken();
 
 		if (!jwtService.validateToken(token) || !jwtService.isRefreshToken(token)) {
-			return ApiResponse.error("Invalid or expired refresh token.");
+			return ApiResponse.badRequest("Invalid or expired refresh token.");
 		}
 
 		String username = jwtService.extractUsername(token);
@@ -103,15 +148,19 @@ public class AuthApiController {
 		String newRefreshToken = jwtService.generateRefreshToken(principal.getUsername());
 
 		boolean startShift = needsShiftStart(principal, httpRequest);
-
+		OperatorShiftDTO activeShift = null;
+		if(!startShift) {
+			String gateIpAddress = httpRequest.getHeader(CommonConstants.GATE_IP_HEADER);
+			activeShift = operatorShiftService.getActiveShiftByOperator(principal.getOperator().getId(), gateIpAddress);
+		}
 		AuthResponseDTO response = new AuthResponseDTO(newAccessToken, newRefreshToken, principal.getUsername(), roles,
-				jwtExpirationMs, startShift);
+				jwtExpirationMs, startShift, activeShift);
 
 		return ApiResponse.ok(response, "Token refreshed.");
 	}
 
 	@PostMapping("/logout")
-	public ApiResponse<Void> logout(@RequestBody(required = false) LogoutRequestDTO request,
+	public ResponseEntity<ApiResponse<Void>> logout(@RequestBody(required = false) LogoutRequestDTO request,
 			HttpServletRequest httpRequest) {
 
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

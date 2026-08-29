@@ -7,32 +7,35 @@ import org.flexitech.projects.icpms.dto.SearchResultDTO;
 import org.flexitech.projects.icpms.dto.gate.GateDTO;
 import org.flexitech.projects.icpms.dto.gate.GateSearchDTO;
 import org.flexitech.projects.icpms.service.gate.GateService;
+import org.flexitech.projects.icpms.service.parking.ParkingAreaService;
 import org.flexitech.projects.icpms.service.site.SiteService;
-import org.flexitech.projects.icpms.service.tariff.TariffService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequestMapping("/gates")
+@RequiredArgsConstructor
 public class GateController {
 
 	private final GateService gateService;
 	private final SiteService siteService;
-	private final TariffService tariffService;
-
-	public GateController(GateService gateService, SiteService siteService, TariffService tariffService) {
-		this.gateService = gateService;
-		this.siteService = siteService;
-		this.tariffService = tariffService;
-	}
-
+	
+	private final ParkingAreaService parkingAreaService;
+	
+	
 	@GetMapping
 	public String list(GateSearchDTO searchDTO,
 			@RequestParam(defaultValue = "0") int page,
@@ -79,8 +82,8 @@ public class GateController {
 		model.addAttribute("statuses", ActiveStatus.getAll());
 		model.addAttribute("gateTypes", GateType.getAll());
 		model.addAttribute("sites", siteService.findAllActiveSites());
+		model.addAttribute("areas", parkingAreaService.findAllActiveParkingAreas());
 		model.addAttribute("activeMenu", "gates");
-		model.addAttribute("tariffList", this.tariffService.findAllActiveTariffs());
 
 	}
 

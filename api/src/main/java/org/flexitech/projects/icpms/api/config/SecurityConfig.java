@@ -76,17 +76,16 @@ public class SecurityConfig {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(
 						auth -> auth
-								.requestMatchers("/api/auth/login", "/api/auth/refresh", "/actuator/health",
+								.requestMatchers("/api/auth/login","/api/auth/validate", "/api/auth/refresh", "/actuator/health",
 										"/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
 								.permitAll().anyRequest().authenticated())
-				.exceptionHandling(
-						exception -> exception.authenticationEntryPoint((request, response, authException) -> {
-							response.setStatus(HttpStatus.UNAUTHORIZED.value());
-							response.setContentType("application/json");
-							response.setCharacterEncoding("UTF-8");
-							response.getWriter().write(objectMapper
-									.writeValueAsString(ApiResponse.error("Unauthorized - please log in again.")));
-						}))
+				.exceptionHandling(exception -> exception.authenticationEntryPoint((request, response, authException) -> {
+				    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+				    response.setContentType("application/json");
+				    response.setCharacterEncoding("UTF-8");
+				    response.getWriter().write(objectMapper
+				            .writeValueAsString(new ApiResponse<Void>(false, "Unauthorized - please log in again.", null)));
+				}))
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();

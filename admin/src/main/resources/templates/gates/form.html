@@ -21,6 +21,9 @@
                         <option th:each="s : ${sites}" th:value="${s.id}" th:text="${s.name}"></option>
                     </select>
                 </div>
+                
+                
+                
                 <div class="col-md-6">
                     <label class="form-label">Gate Type <span class="text-danger">*</span></label>
                     <select th:field="*{type}" class="form-select" required>
@@ -38,18 +41,20 @@
                     <input type="text" th:field="*{code}" class="form-control">
                 </div>
                 
-                <div class="col-md-6">
-                    <label class="form-label">Tariff </label>
-                    <select th:field="*{tariffId}" class="form-select">
-                        <option value="-1">-- Select tariff --</option>
-                        <option th:each="s : ${tariffList}" th:value="${s.id}" th:text="${s.name}"></option>
-                    </select>
-                </div>
+                
 
                 <div class="col-md-6">
                     <label class="form-label">Status</label>
                     <select th:field="*{status}" class="form-select">
                         <option th:each="s : ${statuses}" th:value="${s.code}" th:text="${s.desc}"></option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label">Parking Area <span class="text-danger">*</span></label>
+                    <select th:field="*{parkingAreaId}" class="form-select" required>
+                        <option value="-1">-- Select Parking Area --</option>
+                        <option th:each="s : ${areas}" th:value="${s.id}" th:text="${s.name}"></option>
                     </select>
                 </div>
                 

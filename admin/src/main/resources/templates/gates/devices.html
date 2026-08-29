@@ -121,9 +121,14 @@
                                    th:placeholder="${deviceDTO.id != null} ? 'Leave blank to keep current' : 'Device password'">
                         </div>
 
-                        <div class="col-12">
+                        <div class="col-6">
                             <label class="form-label">Model / Vendor</label>
                             <input type="text" th:field="*{model}" class="form-control" placeholder="e.g. Hikvision DS-TCG205">
+                        </div>
+                        
+                        <div class="col-6">
+                            <label class="form-label">Access URL / API Endpoint</label>
+                            <input type="text" th:field="*{accessUrl}" class="form-control" placeholder="access url/api endpoint">
                         </div>
 
                         <div class="col-12">

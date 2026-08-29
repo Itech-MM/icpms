@@ -13,7 +13,7 @@ public enum GateDeviceType {
 	LED_DISPLAY(2, "LED Display"),
 	GATE_CONTROLLER(3, "Gate Controller / IO Box"),
 	LOOP_DETECTOR(4, "Loop Detector"),
-	INTERCOM(5, "Intercom"),
+	CCTV(5, "CCTV"),
 	OTHER(6, "Other");
 
 	private final Integer code;

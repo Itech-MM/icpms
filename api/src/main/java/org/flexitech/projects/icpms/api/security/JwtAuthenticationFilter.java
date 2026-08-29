@@ -119,6 +119,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	    String path = request.getServletPath();
 	    return path.equals("/api/auth/login")
 	            || path.equals("/api/auth/refresh")
+	            || path.equals("/api/auth/validate")
 	            || path.equals("/actuator/health")
 	            || path.equals("/swagger-ui.html")
 	            || path.startsWith("/swagger-ui/")
@@ -133,6 +134,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		response.setStatus(status.value());
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.error(message)));
+		response.getWriter().write(objectMapper.writeValueAsString(new ApiResponse<Void>(false, message, null)));
 	}
 }

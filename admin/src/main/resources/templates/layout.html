@@ -13,6 +13,7 @@
 <link
 	href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
 	rel="stylesheet">
+<link rel="icon" type="image/png" th:href="@{/images/logo/logo.png}">
 
 <link th:href="@{/plugins/bootstrap/css/bootstrap.min.css}"
 	rel="stylesheet">
@@ -49,6 +50,11 @@
 					th:classappend="${activeMenu == 'gates'} ? 'active'"
 					th:href="@{/gates}"> <i class="bi bi-sign-turn-right"></i>
 						Gates
+				</a></li>
+				<li class="nav-item"><a class="nav-link"
+					th:classappend="${activeMenu == 'parking-areas'} ? 'active'"
+					th:href="@{/parking-areas}"> <i class="bi bi-grid-1x2"></i>
+						Parking Areas
 				</a></li>
 				<li class="nav-item"><a class="nav-link"
 					th:classappend="${activeMenu == 'slots'} ? 'active'"

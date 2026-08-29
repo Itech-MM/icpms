@@ -1,12 +1,15 @@
 package org.flexitech.projects.icpms.service.session;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.flexitech.projects.icpms.common.enums.ParkingSessionStatus;
 import org.flexitech.projects.icpms.common.enums.SlotStatus;
+import org.flexitech.projects.icpms.common.utils.CommonUtils;
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
+import org.flexitech.projects.icpms.dto.operator.OperatorShiftSummaryDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionCloseDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionCreateDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionDTO;
@@ -174,5 +177,24 @@ public class ParkingSessionServiceImpl implements ParkingSessionService {
 				.orElseThrow(() -> new EntityNotFoundException("Parking session doesn't exist!"));
 		long millis = new Date().getTime() - session.getEntryTime().getTime();
 		return Math.max(0, millis / (60 * 1000));
+	}
+
+	@Override
+	public OperatorShiftSummaryDTO getShiftSummary(Long shiftId) {
+		OperatorShift shift = this.operatorShiftRepository.findById(shiftId)
+				.orElseThrow(() -> new EntityNotFoundException("Shift doesn't exist!"));
+
+		long incomplete = this.sessionRepository.countByEntryShiftIdAndStatus(shiftId, ParkingSessionStatus.ACTIVE.getCode());
+		long completed = this.sessionRepository.countByExitShiftIdAndStatus(shiftId, ParkingSessionStatus.COMPLETED.getCode());
+		BigDecimal totalAmount = this.sessionRepository.sumTotalAmountByShiftAndStatus(shiftId, ParkingSessionStatus.COMPLETED.getCode());
+
+		OperatorShiftSummaryDTO summary = new OperatorShiftSummaryDTO();
+		summary.setCode(shift.getCode());
+		summary.setTotalTransactions((int) (incomplete + completed));
+		summary.setTotalIncompleteTransactions((int) incomplete);
+		summary.setTotalCompletedTransactions((int) completed);
+		summary.setTotalAmount(totalAmount);
+		summary.setTotalAmountDesc(CommonUtils.formatNumber(totalAmount));
+		return summary;
 	}
 }

@@ -11,4 +11,6 @@ public interface GateRepository extends JpaRepository<Gate, Long>, JpaSpecificat
 	List<Gate> findBySiteId(Long siteId);
 	
 	Optional<Gate> findByGateIpAddress(String gateIpAddress);
+	
+	List<Gate> findByStatus(Integer status);
 }

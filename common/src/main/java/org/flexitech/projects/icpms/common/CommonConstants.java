@@ -20,8 +20,6 @@ public class CommonConstants {
 	/* Pagination */
 	public static final int ROW_PER_PAGE = 10;
 	
-	public static final int HOME_PROMOTION_DISPLAY_LIMIT = 3;
-	
 	/* Form Messages */
 	public static final String FORM_ERROR_MESSAGE = "errorMsg";
 	public static final String FORM_SUCCESS_MESSAGE = "successMsg";
@@ -29,4 +27,6 @@ public class CommonConstants {
 	
 	public static final String GATE_IP_HEADER = "gate-ip";
 
+	public static final Integer MAX_RETRY = 5;
+	
 }

@@ -62,8 +62,8 @@ public class GateDeviceServiceImpl implements GateDeviceService {
 		device.setRemarks(dto.getRemarks());
 		device.setStatus(CommonValidators.isValidObject(dto.getStatus()) ? dto.getStatus() : ActiveStatus.ACTIVE.getCode());
 
-		// Only overwrite the password if a new one was actually entered, so
-		// leaving the field blank on edit keeps the existing credential.
+		device.setAccessUrl(dto.getAccessUrl());
+		
 		if (CommonValidators.validString(dto.getPassword())) {
 			device.setPassword(dto.getPassword());
 		} else {

@@ -22,6 +22,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class OperatorShift extends BasedEntity{
+	
+	private String code;
 
 	@ManyToOne
 	@JoinColumn(name = "operator_id")

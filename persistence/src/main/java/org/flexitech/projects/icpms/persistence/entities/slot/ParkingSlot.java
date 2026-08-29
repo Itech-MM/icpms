@@ -2,6 +2,7 @@ package org.flexitech.projects.icpms.persistence.entities.slot;
 
 import org.flexitech.projects.icpms.common.TableNames;
 import org.flexitech.projects.icpms.persistence.BasedEntity;
+import org.flexitech.projects.icpms.persistence.entities.parking.ParkingArea;
 import org.flexitech.projects.icpms.persistence.entities.site.Site;
 
 import jakarta.persistence.Column;
@@ -21,6 +22,10 @@ public class ParkingSlot extends BasedEntity {
 	@ManyToOne
 	@JoinColumn(name = "site_id")
 	private Site site;
+	
+	@ManyToOne
+	@JoinColumn(name = "parking_area_id")
+	private ParkingArea parkingArea;
 
 	@Column(name = "slot_number")
 	private String slotNumber;

@@ -4,9 +4,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Optional;
 
+import org.flexitech.projects.icpms.common.CommonConstants;
 import org.flexitech.projects.icpms.common.CommonValidators;
 import org.flexitech.projects.icpms.common.enums.ParkingSessionStatus;
 import org.flexitech.projects.icpms.common.enums.ShiftStatus;
+import org.flexitech.projects.icpms.common.utils.QRCodeGenerator;
 import org.flexitech.projects.icpms.dto.operator.OperatorShiftDTO;
 import org.flexitech.projects.icpms.persistence.entities.gate.Gate;
 import org.flexitech.projects.icpms.persistence.entities.operator.Operator;
@@ -32,6 +34,8 @@ public class OperatorShiftServiceImpl implements OperatorShiftService {
 	private final GateRepository gateRepository;
 	
 	private final ParkingSessionRepository parkingSessionRepository;
+	
+	private final QRCodeGenerator qrCodeGenerator;
 
 	@Override
 	public OperatorShiftDTO startShift(OperatorShiftDTO dto) {
@@ -59,6 +63,27 @@ public class OperatorShiftServiceImpl implements OperatorShiftService {
 		shift.setShiftStatus(ShiftStatus.OPEN.getCode());
 		shift.setOpeningCash(dto.getOpeningCash());
 		shift.setRemark(dto.getRemark());
+		
+		String code = null;
+		int attempts = 0;
+
+		while (attempts < CommonConstants.MAX_RETRY) {
+		    attempts++;
+		    String candidate = qrCodeGenerator.generateRandomCouponCode();
+
+		    if (operatorShiftRepository.findByCode(candidate).isEmpty()) {
+		        code = candidate;
+		        break;
+		    }
+
+		    log.warn("Attempt {} generated duplicate code, retrying...", attempts);
+		}
+
+		if (code == null) {
+		    throw new IllegalStateException("Failed to generate a unique shift code after " + CommonConstants.MAX_RETRY + " attempts");
+		}
+
+		shift.setCode(code);
 
 		OperatorShift saved = operatorShiftRepository.save(shift);
 

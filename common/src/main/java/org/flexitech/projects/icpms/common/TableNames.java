@@ -22,5 +22,7 @@ public class TableNames {
     public static final String GATE_DEVICE_TBL = "gate_devices";
     
     public static final String OPERATOR_SHIFT_TBL = "operator_shift";
+    
+    public static final String PARKING_AREA_TBL = "parking_area";
 
 }

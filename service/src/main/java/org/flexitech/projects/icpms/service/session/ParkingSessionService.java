@@ -3,6 +3,7 @@ package org.flexitech.projects.icpms.service.session;
 import java.util.Optional;
 
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
+import org.flexitech.projects.icpms.dto.operator.OperatorShiftSummaryDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionCloseDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionCreateDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionDTO;
@@ -21,4 +22,7 @@ public interface ParkingSessionService {
     ParkingSessionDTO closeSession(ParkingSessionCloseDTO closeDTO) throws Exception;
 
     long getElapsedMinutes(Long sessionId) throws Exception;
+    
+
+	OperatorShiftSummaryDTO getShiftSummary(Long shiftId);
 }

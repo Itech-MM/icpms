@@ -18,6 +18,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class OperatorShiftDTO extends CommonDTO {
+	private String code;
 	private OperatorDTO operator;
 	private Long operatorId;
 
@@ -50,6 +51,8 @@ public class OperatorShiftDTO extends CommonDTO {
 	public OperatorShiftDTO(OperatorShift o) {
 		super(o);
 
+		this.code = o.getCode();
+		
 		if (o.getOperator() != null) {
 			this.operator = new OperatorDTO(o.getOperator());
 			this.operatorId = o.getOperator().getId();

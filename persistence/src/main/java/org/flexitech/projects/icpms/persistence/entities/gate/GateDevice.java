@@ -40,6 +40,9 @@ public class GateDevice extends BasedEntity {
 	private String model;
 
 	private Integer status = 1;
+	
+	@Column(name = "access_url")
+	private String accessUrl;
 
 	@Column(length = 500)
 	private String remarks;

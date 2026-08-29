@@ -10,9 +10,11 @@ import org.flexitech.projects.icpms.dto.SearchResultDTO;
 import org.flexitech.projects.icpms.dto.slot.ParkingSlotBulkDTO;
 import org.flexitech.projects.icpms.dto.slot.ParkingSlotDTO;
 import org.flexitech.projects.icpms.dto.slot.ParkingSlotSearchDTO;
+import org.flexitech.projects.icpms.persistence.entities.parking.ParkingArea;
 import org.flexitech.projects.icpms.persistence.entities.site.Site;
 import org.flexitech.projects.icpms.persistence.entities.slot.ParkingSlot;
 import org.flexitech.projects.icpms.persistence.entities.user.User;
+import org.flexitech.projects.icpms.persistence.repositories.parking.ParkingAreaRepository;
 import org.flexitech.projects.icpms.persistence.repositories.site.SiteRepository;
 import org.flexitech.projects.icpms.persistence.repositories.slot.ParkingSlotRepository;
 import org.flexitech.projects.icpms.service.auth.AuthenticationService;
@@ -30,12 +32,16 @@ public class ParkingSlotServiceImpl implements ParkingSlotService {
 
 	private final ParkingSlotRepository slotRepository;
 	private final SiteRepository siteRepository;
+	private final ParkingAreaRepository parkingAreaRepository;
+	
 	private final AuthenticationService authenticationService;
+	
 
 	public ParkingSlotServiceImpl(ParkingSlotRepository slotRepository, SiteRepository siteRepository,
-			AuthenticationService authenticationService) {
+			AuthenticationService authenticationService, ParkingAreaRepository parkingAreaRepository) {
 		this.slotRepository = slotRepository;
 		this.siteRepository = siteRepository;
+		this.parkingAreaRepository = parkingAreaRepository;
 		this.authenticationService = authenticationService;
 	}
 
@@ -62,6 +68,12 @@ public class ParkingSlotServiceImpl implements ParkingSlotService {
 			Site site = this.siteRepository.findById(dto.getSiteId())
 					.orElseThrow(() -> new EntityNotFoundException("Site doesn't exist!"));
 			slot.setSite(site);
+		}
+		
+		if (CommonValidators.validLong(dto.getParkingAreaId())) {
+			ParkingArea area = this.parkingAreaRepository.findById(dto.getSiteId())
+					.orElseThrow(() -> new EntityNotFoundException("Parking area doesn't exist!"));
+			slot.setParkingArea(area);
 		}
 
 		ParkingSlot saved = this.slotRepository.save(slot);
@@ -120,6 +132,7 @@ public class ParkingSlotServiceImpl implements ParkingSlotService {
 	        dto.setFloorLevel(bulkDTO.getFloorLevel());
 	        dto.setStatus(bulkDTO.getStatus());
 	        dto.setIsVip(bulkDTO.getIsVip());
+	        dto.setParkingAreaId(bulkDTO.getParkingAreaId());
 	        manageSlot(dto);
 	        count++;
 	    }

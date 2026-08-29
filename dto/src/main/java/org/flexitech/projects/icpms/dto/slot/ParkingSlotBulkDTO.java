@@ -12,6 +12,7 @@ import lombok.Setter;
 public class ParkingSlotBulkDTO {
 
     private Long siteId;
+    private Long parkingAreaId;
     private String prefix;
     private String floorLevel;
     private Integer status;

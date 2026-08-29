@@ -20,4 +20,7 @@ public interface ParkingSessionRepository extends JpaRepository<ParkingSession, 
 	BigDecimal sumTotalAmountByShiftAndStatus(@Param("shiftId") Long shiftId,
 			@Param("completedStatus") Integer completedStatus);
 	
+	long countByEntryShiftIdAndStatus(Long entryShiftId, Integer status);
+	long countByExitShiftIdAndStatus(Long exitShiftId, Integer status);
+	
 }

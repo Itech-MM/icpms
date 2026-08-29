@@ -28,6 +28,8 @@ import org.flexitech.projects.icpms.service.payment.PaymentService;
 import org.flexitech.projects.icpms.service.session.ParkingSessionService;
 import org.flexitech.projects.icpms.service.tariff.TariffService;
 import org.flexitech.projects.icpms.service.vehicle.VehicleService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +45,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/visitors")
 @RequiredArgsConstructor
-public class VisitorController {
+public class VisitorApiController {
 
 	private final VehicleService vehicleService;
 	private final MemberService memberService;
@@ -54,7 +55,7 @@ public class VisitorController {
 	private final OperatorShiftService operatorShiftService;
 
 	@GetMapping("/lookup")
-	public ApiResponse<VisitorLookupResponseDTO> lookup(@RequestParam String plateNumber) throws Exception {
+	public ResponseEntity<ApiResponse<VisitorLookupResponseDTO>> lookup(@RequestParam String plateNumber) throws Exception {
 		VisitorLookupResponseDTO result = new VisitorLookupResponseDTO();
 
 		Optional<ParkingSessionDTO> activeSession = parkingSessionService.findActiveByPlateNumber(plateNumber);
@@ -73,7 +74,7 @@ public class VisitorController {
 	}
 
 	@PostMapping("/entry")
-	public ApiResponse<ParkingSessionDTO> saveEntry(@Valid @RequestBody VisitorEntryRequestDTO request,
+	public ResponseEntity<ApiResponse<ParkingSessionDTO>> saveEntry(@Valid @RequestBody VisitorEntryRequestDTO request,
 			Authentication authentication, HttpServletRequest httpRequest) throws Exception {
 
 		VehicleDTO vehicle = vehicleService.findOrCreateByPlateNumber(request.getPlateNumber(),
@@ -83,18 +84,24 @@ public class VisitorController {
 		if (!CommonValidators.validLong(tariffId)) {
 			List<TariffDTO> activeTariffs = tariffService.findAllActiveTariffs();
 			if (activeTariffs.isEmpty()) {
-				throw new EntityNotFoundException("No active tariff is configured - please set one up first.");
+				return ApiResponse.badRequest("No active tariff is configured - please set one up first.");
 			}
 			tariffId = activeTariffs.get(0).getId();
 		}
 
 		OperatorPrincipal operator = currentOperator(authentication);
+		if (operator == null) {
+			return ApiResponse.error(HttpStatus.UNAUTHORIZED, "Operator context is required to record a parking session.");
+		}
+
 		OperatorShiftDTO activeShift = resolveActiveShift(operator, httpRequest);
+		if (activeShift == null) {
+			return ApiResponse.badRequest("No active shift found - please open a shift first.");
+		}
 
 		ParkingSessionCreateDTO createDTO = new ParkingSessionCreateDTO();
 		createDTO.setVehicleId(vehicle.getId());
 		createDTO.setEntryGateId(activeShift.getGateId());
-		
 		createDTO.setTariffId(tariffId);
 		createDTO.setOperatorId(operator.getOperator().getId());
 		createDTO.setEntryShiftId(activeShift.getId());
@@ -105,9 +112,12 @@ public class VisitorController {
 	}
 
 	@GetMapping("/exit-preview")
-	public ApiResponse<VisitorExitPreviewResponseDTO> exitPreview(@RequestParam String plateNumber) throws Exception {
-		ParkingSessionDTO session = parkingSessionService.findActiveByPlateNumber(plateNumber)
-				.orElseThrow(() -> new EntityNotFoundException("No active parking session found for this plate."));
+	public ResponseEntity<ApiResponse<VisitorExitPreviewResponseDTO>> exitPreview(@RequestParam String plateNumber) throws Exception {
+		Optional<ParkingSessionDTO> activeSession = parkingSessionService.findActiveByPlateNumber(plateNumber);
+		if (activeSession.isEmpty()) {
+			return ApiResponse.notFound("No active parking session found for this plate.");
+		}
+		ParkingSessionDTO session = activeSession.get();
 
 		long durationMinutes = parkingSessionService.getElapsedMinutes(session.getId());
 		BigDecimal amountDue = tariffService.calculateFee(session.getTariffId(), durationMinutes);
@@ -119,42 +129,63 @@ public class VisitorController {
 	}
 
 	@PostMapping("/exit")
-	public ApiResponse<VisitorExitResponseDTO> exit(@Valid @RequestBody VisitorExitRequestDTO request,
-	        Authentication authentication, HttpServletRequest httpRequest) throws Exception {
-	    ParkingSessionDTO activeSession = parkingSessionService.findActiveByPlateNumber(request.getPlateNumber())
-	            .orElseThrow(() -> new EntityNotFoundException("No active parking session found for this plate."));
+	public ResponseEntity<ApiResponse<VisitorExitResponseDTO>> exit(@Valid @RequestBody VisitorExitRequestDTO request,
+			Authentication authentication, HttpServletRequest httpRequest) throws Exception {
+		Optional<ParkingSessionDTO> activeSessionOpt = parkingSessionService.findActiveByPlateNumber(request.getPlateNumber());
+		if (activeSessionOpt.isEmpty()) {
+			return ApiResponse.notFound("No active parking session found for this plate.");
+		}
+		ParkingSessionDTO activeSession = activeSessionOpt.get();
 
-	    long durationMinutes = parkingSessionService.getElapsedMinutes(activeSession.getId());
-	    BigDecimal amountDue = tariffService.calculateFee(activeSession.getTariffId(), durationMinutes);
+		long durationMinutes = parkingSessionService.getElapsedMinutes(activeSession.getId());
+		BigDecimal amountDue = tariffService.calculateFee(activeSession.getTariffId(), durationMinutes);
 
-	    OperatorPrincipal operator = currentOperator(authentication);
-	    OperatorShiftDTO activeShift = resolveActiveShift(operator, httpRequest);
+		OperatorPrincipal operator = currentOperator(authentication);
+		if (operator == null) {
+			return ApiResponse.error(HttpStatus.UNAUTHORIZED, "Operator context is required to record a parking session.");
+		}
 
-	    ParkingSessionCloseDTO closeDTO = new ParkingSessionCloseDTO();
-	    closeDTO.setSessionId(activeSession.getId());
-	    closeDTO.setExitGateId(activeShift.getGateId());
-	    closeDTO.setTotalAmount(amountDue);
-	    closeDTO.setExitShiftId(activeShift.getId());
+		OperatorShiftDTO activeShift = resolveActiveShift(operator, httpRequest);
+		if (activeShift == null) {
+			return ApiResponse.badRequest("No active shift found - please open a shift first.");
+		}
 
-	    ParkingSessionDTO closedSession = parkingSessionService.closeSession(closeDTO);
-	    PaymentDTO payment = paymentService.recordPayment(activeSession.getId(), amountDue, request.getPaymentMethod(), request.getReferenceNo());
+		ParkingSessionCloseDTO closeDTO = new ParkingSessionCloseDTO();
+		closeDTO.setSessionId(activeSession.getId());
+		closeDTO.setExitGateId(activeShift.getGateId());
+		closeDTO.setTotalAmount(amountDue);
+		closeDTO.setExitShiftId(activeShift.getId());
 
-	    return ApiResponse.ok(new VisitorExitResponseDTO(closedSession, payment), "Exit completed.");
+		ParkingSessionDTO closedSession = parkingSessionService.closeSession(closeDTO);
+		PaymentDTO payment = paymentService.recordPayment(activeSession.getId(), amountDue, request.getPaymentMethod(), request.getReferenceNo());
+
+		return ApiResponse.ok(new VisitorExitResponseDTO(closedSession, payment), "Exit completed.");
 	}
 
 	@PostMapping("/exit/waive")
-	public ApiResponse<VisitorExitResponseDTO> waive(@Valid @RequestBody VisitorWaiveRequestDTO request,
+	public ResponseEntity<ApiResponse<VisitorExitResponseDTO>> waive(@Valid @RequestBody VisitorWaiveRequestDTO request,
 			Authentication authentication, HttpServletRequest httpRequest) throws Exception {
-		ParkingSessionDTO activeSession = parkingSessionService.findActiveByPlateNumber(request.getPlateNumber())
-				.orElseThrow(() -> new EntityNotFoundException("No active parking session found for this plate."));
-	    OperatorPrincipal operator = currentOperator(authentication);
-	    OperatorShiftDTO activeShift = resolveActiveShift(operator, httpRequest);
+		Optional<ParkingSessionDTO> activeSessionOpt = parkingSessionService.findActiveByPlateNumber(request.getPlateNumber());
+		if (activeSessionOpt.isEmpty()) {
+			return ApiResponse.notFound("No active parking session found for this plate.");
+		}
+		ParkingSessionDTO activeSession = activeSessionOpt.get();
+
+		OperatorPrincipal operator = currentOperator(authentication);
+		if (operator == null) {
+			return ApiResponse.error(HttpStatus.UNAUTHORIZED, "Operator context is required to record a parking session.");
+		}
+
+		OperatorShiftDTO activeShift = resolveActiveShift(operator, httpRequest);
+		if (activeShift == null) {
+			return ApiResponse.badRequest("No active shift found - please open a shift first.");
+		}
 
 		ParkingSessionCloseDTO closeDTO = new ParkingSessionCloseDTO();
-	    closeDTO.setSessionId(activeSession.getId());
-	    closeDTO.setExitGateId(activeShift.getGateId());
-	    closeDTO.setTotalAmount(BigDecimal.ZERO);
-	    closeDTO.setExitShiftId(activeShift.getId());
+		closeDTO.setSessionId(activeSession.getId());
+		closeDTO.setExitGateId(activeShift.getGateId());
+		closeDTO.setTotalAmount(BigDecimal.ZERO);
+		closeDTO.setExitShiftId(activeShift.getId());
 
 		ParkingSessionDTO closedSession = parkingSessionService.closeSession(closeDTO);
 
@@ -178,15 +209,7 @@ public class VisitorController {
 
 	private OperatorShiftDTO resolveActiveShift(OperatorPrincipal operator, HttpServletRequest httpRequest)
 			throws Exception {
-		if (operator == null) {
-			throw new IllegalStateException("Operator context is required to record a parking session.");
-		}
 		String gateIpAddress = httpRequest.getHeader(CommonConstants.GATE_IP_HEADER);
-		OperatorShiftDTO activeShift = operatorShiftService.getActiveShiftByOperator(operator.getOperator().getId(),
-				gateIpAddress);
-		if (activeShift == null) {
-			throw new IllegalStateException("No active shift found - please open a shift first.");
-		}
-		return activeShift;
+		return operatorShiftService.getActiveShiftByOperator(operator.getOperator().getId(), gateIpAddress);
 	}
 }

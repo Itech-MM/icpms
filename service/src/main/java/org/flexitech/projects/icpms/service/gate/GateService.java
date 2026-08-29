@@ -14,4 +14,6 @@ public interface GateService {
 	List<GateDTO> findBySite(Long siteId);
 	List<GateDTO> findAll();
 	boolean deleteGate(Long id) throws Exception;
+	List<GateDTO> findAllActiveGates();
+	GateDTO findByIpAddress(String ipAddress);
 }

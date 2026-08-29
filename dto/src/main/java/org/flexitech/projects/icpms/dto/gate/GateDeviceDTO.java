@@ -45,6 +45,8 @@ public class GateDeviceDTO extends CommonDTO {
 	private String statusDesc;
 
 	private String remarks;
+	
+	private String accessUrl;
 
 	public GateDeviceDTO(GateDevice device) {
 		super(device);
@@ -65,5 +67,6 @@ public class GateDeviceDTO extends CommonDTO {
 		this.status = device.getStatus();
 		this.statusDesc = ActiveStatus.getDescByCode(status);
 		this.remarks = device.getRemarks();
+		this.accessUrl = device.getAccessUrl();
 	}
 }

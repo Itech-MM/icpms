@@ -6,6 +6,7 @@ import org.flexitech.projects.icpms.dto.SearchResultDTO;
 import org.flexitech.projects.icpms.dto.slot.ParkingSlotBulkDTO;
 import org.flexitech.projects.icpms.dto.slot.ParkingSlotDTO;
 import org.flexitech.projects.icpms.dto.slot.ParkingSlotSearchDTO;
+import org.flexitech.projects.icpms.service.parking.ParkingAreaService;
 import org.flexitech.projects.icpms.service.site.SiteService;
 import org.flexitech.projects.icpms.service.slot.ParkingSlotService;
 import org.springframework.data.domain.PageRequest;
@@ -30,10 +31,12 @@ public class ParkingSlotController {
 
 	private final ParkingSlotService slotService;
 	private final SiteService siteService;
+	private final ParkingAreaService parkingAreaService;
 
-	public ParkingSlotController(ParkingSlotService slotService, SiteService siteService) {
+	public ParkingSlotController(ParkingSlotService slotService, SiteService siteService, ParkingAreaService parkingAreaService) {
 		this.slotService = slotService;
 		this.siteService = siteService;
+		this.parkingAreaService = parkingAreaService;
 	}
 
 	@GetMapping
@@ -118,6 +121,7 @@ public class ParkingSlotController {
 	private void loadFormRefData(Model model) {
 	    model.addAttribute("slotStatuses", SlotStatus.getAll());
 	    model.addAttribute("sites", siteService.findAllActiveSites());
+	    model.addAttribute("areaList", parkingAreaService.findAllActiveParkingAreas());
 	    model.addAttribute("activeMenu", "slots");
 	    if (!model.containsAttribute("bulkDTO")) {
 	        model.addAttribute("bulkDTO", new ParkingSlotBulkDTO());

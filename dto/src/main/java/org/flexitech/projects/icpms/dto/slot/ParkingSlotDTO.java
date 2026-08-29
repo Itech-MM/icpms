@@ -21,6 +21,11 @@ public class ParkingSlotDTO extends CommonDTO {
 	@NotNull
 	private Long siteId;
 	private String siteName;
+	
+	@NotNull
+	private Long parkingAreaId;
+	private String parkingAreaName;
+	
 	@NotBlank
 	private String slotNumber;
 	private String floorLevel;
@@ -34,6 +39,12 @@ public class ParkingSlotDTO extends CommonDTO {
 			this.siteId = slot.getSite().getId();
 			this.siteName = slot.getSite().getName();
 		}
+		
+		if (CommonValidators.isValidObject(slot.getParkingArea())) {
+			this.parkingAreaId = slot.getParkingArea().getId();
+			this.parkingAreaName = slot.getParkingArea().getName();
+		}
+		
 		this.slotNumber = slot.getSlotNumber();
 		this.floorLevel = slot.getFloorLevel();
 		this.isVip = slot.getIsVip();
