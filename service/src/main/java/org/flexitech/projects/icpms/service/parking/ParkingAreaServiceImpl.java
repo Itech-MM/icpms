@@ -163,4 +163,12 @@ public class ParkingAreaServiceImpl implements ParkingAreaService {
 		return dto;
 	}
 
+	@Override
+	public ParkingAreaDTO getByGateId(Long gateId) {
+		Gate gate = this.gateRepository.findById(gateId)
+				.orElseThrow(()-> new RuntimeException("Invalid gate."));
+		
+		return new ParkingAreaDTO(gate.getParkingArea());
+	}
+
 }

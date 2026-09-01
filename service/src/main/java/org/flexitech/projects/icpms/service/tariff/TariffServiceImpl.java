@@ -11,12 +11,15 @@ import org.flexitech.projects.icpms.dto.SearchResultDTO;
 import org.flexitech.projects.icpms.dto.tariff.TariffDTO;
 import org.flexitech.projects.icpms.dto.tariff.TariffRateDTO;
 import org.flexitech.projects.icpms.dto.tariff.TariffSearchDTO;
+import org.flexitech.projects.icpms.persistence.entities.operator.OperatorShift;
 import org.flexitech.projects.icpms.persistence.entities.tariff.Tariff;
 import org.flexitech.projects.icpms.persistence.entities.tariff.TariffRate;
 import org.flexitech.projects.icpms.persistence.entities.user.User;
+import org.flexitech.projects.icpms.persistence.repositories.operator.OperatorShiftRepository;
 import org.flexitech.projects.icpms.persistence.repositories.tariff.TariffRateRepository;
 import org.flexitech.projects.icpms.persistence.repositories.tariff.TariffRepository;
 import org.flexitech.projects.icpms.service.auth.AuthenticationService;
+import org.flexitech.projects.icpms.service.operator.OperatorShiftService;
 import org.flexitech.projects.icpms.service.specifications.tariff.TariffSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,21 +27,19 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class TariffServiceImpl implements TariffService {
 
 	private final TariffRepository tariffRepository;
 	private final TariffRateRepository tariffRateRepository;
 	private final AuthenticationService authenticationService;
-
-	public TariffServiceImpl(TariffRepository tariffRepository, TariffRateRepository tariffRateRepository,
-			AuthenticationService authenticationService) {
-		this.tariffRepository = tariffRepository;
-		this.tariffRateRepository = tariffRateRepository;
-		this.authenticationService = authenticationService;
-	}
-
+	
+	private final OperatorShiftRepository operatorShiftRepository;
+	
+	
 	@Override
 	public TariffDTO manageTariff(TariffDTO dto) throws Exception {
 		Tariff tariff;
@@ -160,4 +161,5 @@ public class TariffServiceImpl implements TariffService {
 
 		return rates.get(rates.size() - 1).getAmount();
 	}
+
 }

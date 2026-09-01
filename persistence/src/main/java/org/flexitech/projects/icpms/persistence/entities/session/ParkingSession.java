@@ -8,6 +8,7 @@ import org.flexitech.projects.icpms.persistence.BasedEntity;
 import org.flexitech.projects.icpms.persistence.entities.gate.Gate;
 import org.flexitech.projects.icpms.persistence.entities.operator.Operator;
 import org.flexitech.projects.icpms.persistence.entities.operator.OperatorShift;
+import org.flexitech.projects.icpms.persistence.entities.parking.ParkingArea;
 import org.flexitech.projects.icpms.persistence.entities.slot.ParkingSlot;
 import org.flexitech.projects.icpms.persistence.entities.tariff.Tariff;
 import org.flexitech.projects.icpms.persistence.entities.vehicle.Vehicle;
@@ -79,4 +80,8 @@ public class ParkingSession extends BasedEntity {
 	@ManyToOne
 	@JoinColumn(name = "exit_shift_id")
 	private OperatorShift exitShift;
+	
+	@ManyToOne
+	@JoinColumn(name = "parking_area_id")
+	private ParkingArea parkingArea;
 }

@@ -13,7 +13,5 @@ public class VisitorEntryRequestDTO {
 
 	private String vehicleType;
 
-	private Long parkingSlotId;
-
-	private Long tariffId;
+	private Long parkingSlotId;	
 }

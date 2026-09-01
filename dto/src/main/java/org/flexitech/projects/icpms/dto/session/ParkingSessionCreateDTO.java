@@ -13,4 +13,5 @@ public class ParkingSessionCreateDTO {
     private Long operatorId;
     private Long entryShiftId;
     private String entryPhotoUrl;
+    private Long parkingAreaId;
 }

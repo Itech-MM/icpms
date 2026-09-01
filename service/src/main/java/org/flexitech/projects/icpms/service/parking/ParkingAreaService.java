@@ -21,5 +21,7 @@ public interface ParkingAreaService {
 	List<ParkingAreaDTO> findAllActiveParkingAreas();
 	
 	ParkingAreaRealtimeDTO getRealtimeByGate(String gateIpAddress) throws Exception;
+	
+	ParkingAreaDTO getByGateId(Long gateId);
 
 }

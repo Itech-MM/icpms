@@ -70,21 +70,21 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="session : ${result.results}">
-                            <td th:text="${session.id}"></td>
-                            <td th:text="${session.plateNumber}"></td>
-                            <td th:text="${session.siteName}"></td>
-                            <td th:text="${session.entryGateName}"></td>
-                            <td th:text="${session.exitGateName} ?: '-'"></td>
-                            <td th:text="${session.parkingSlotNumber} ?: '-'"></td>
-                            <td th:text="${session.tariffName}"></td>
-                            <td th:text="${session.entryTime}"></td>
-                            <td th:text="${session.exitTime} ?: '-'"></td>
-                            <td th:text="${session.totalAmount} ?: '-'"></td>
+                        <tr th:each="data, iterStat : ${result.results}">
+                            <td th:text="${iterStat.count}"></td>
+                            <td th:text="${data.plateNumber}"></td>
+                            <td th:text="${data.siteName}"></td>
+                            <td th:text="${data.entryGateName}"></td>
+                            <td th:text="${data.exitGateName} ?: '-'"></td>
+                            <td th:text="${data.parkingSlotNumber} ?: '-'"></td>
+                            <td th:text="${data.tariffName}"></td>
+                            <td th:text="${data.entryTime}"></td>
+                            <td th:text="${data.exitTime} ?: '-'"></td>
+                            <td th:text="${data.totalAmount} ?: '-'"></td>
                             <td>
                                 <span class="badge"
-                                      th:classappend="${session.status == 1} ? 'bg-warning text-dark' : (${session.status == 2} ? 'bg-success' : 'bg-secondary')"
-                                      th:text="${session.statusDesc}"></span>
+                                      th:classappend="${data.status == 1} ? 'bg-warning text-dark' : (${data.status == 2} ? 'bg-success' : 'bg-secondary')"
+                                      th:text="${data.statusDesc}"></span>
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(result.results)}">

@@ -40,6 +40,8 @@ public class ParkingSessionDTO extends CommonDTO {
 	private Integer status = 1;
 	private String statusDesc;
 	private String siteName;
+	private Long parkingAreaId;
+	private String parkingAreaName;
 
 	public ParkingSessionDTO(ParkingSession session) {
 		super(session);
@@ -75,6 +77,10 @@ public class ParkingSessionDTO extends CommonDTO {
 		}
 		if (CommonValidators.isValidObject(session.getExitTime())) {
 			this.exitTime = DateUtils.dateToString(session.getExitTime(), CommonConstants.STANDARD_24_HOUR_DATE_FORMAT2);
+		}
+		if(CommonValidators.isValidObject(session.getParkingArea())) {
+			this.parkingAreaId = session.getParkingArea().getId();
+			this.parkingAreaName = session.getParkingArea().getName();
 		}
 		this.entryPhotoUrl = session.getEntryPhotoUrl();
 		this.exitPhotoUrl = session.getExitPhotoUrl();

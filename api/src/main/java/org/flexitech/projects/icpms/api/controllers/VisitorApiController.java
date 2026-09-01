@@ -1,7 +1,6 @@
 package org.flexitech.projects.icpms.api.controllers;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 import org.flexitech.projects.icpms.api.security.OperatorPrincipal;
@@ -14,16 +13,19 @@ import org.flexitech.projects.icpms.dto.api.response.ApiResponse;
 import org.flexitech.projects.icpms.dto.api.response.visitor.VisitorExitPreviewResponseDTO;
 import org.flexitech.projects.icpms.dto.api.response.visitor.VisitorExitResponseDTO;
 import org.flexitech.projects.icpms.dto.api.response.visitor.VisitorLookupResponseDTO;
+import org.flexitech.projects.icpms.dto.gate.GateDTO;
 import org.flexitech.projects.icpms.dto.member.MemberDTO;
 import org.flexitech.projects.icpms.dto.operator.OperatorShiftDTO;
+import org.flexitech.projects.icpms.dto.parking.ParkingAreaDTO;
 import org.flexitech.projects.icpms.dto.payment.PaymentDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionCloseDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionCreateDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionDTO;
-import org.flexitech.projects.icpms.dto.tariff.TariffDTO;
 import org.flexitech.projects.icpms.dto.vehicle.VehicleDTO;
+import org.flexitech.projects.icpms.service.gate.GateService;
 import org.flexitech.projects.icpms.service.member.MemberService;
 import org.flexitech.projects.icpms.service.operator.OperatorShiftService;
+import org.flexitech.projects.icpms.service.parking.ParkingAreaService;
 import org.flexitech.projects.icpms.service.payment.PaymentService;
 import org.flexitech.projects.icpms.service.session.ParkingSessionService;
 import org.flexitech.projects.icpms.service.tariff.TariffService;
@@ -54,8 +56,13 @@ public class VisitorApiController {
 	private final PaymentService paymentService;
 	private final OperatorShiftService operatorShiftService;
 
+	private final ParkingAreaService parkingAreaService;
+
+	private final GateService gateService;
+
 	@GetMapping("/lookup")
-	public ResponseEntity<ApiResponse<VisitorLookupResponseDTO>> lookup(@RequestParam String plateNumber) throws Exception {
+	public ResponseEntity<ApiResponse<VisitorLookupResponseDTO>> lookup(@RequestParam String plateNumber)
+			throws Exception {
 		VisitorLookupResponseDTO result = new VisitorLookupResponseDTO();
 
 		Optional<ParkingSessionDTO> activeSession = parkingSessionService.findActiveByPlateNumber(plateNumber);
@@ -80,18 +87,17 @@ public class VisitorApiController {
 		VehicleDTO vehicle = vehicleService.findOrCreateByPlateNumber(request.getPlateNumber(),
 				request.getVehicleType());
 
-		Long tariffId = request.getTariffId();
-		if (!CommonValidators.validLong(tariffId)) {
-			List<TariffDTO> activeTariffs = tariffService.findAllActiveTariffs();
-			if (activeTariffs.isEmpty()) {
-				return ApiResponse.badRequest("No active tariff is configured - please set one up first.");
-			}
-			tariffId = activeTariffs.get(0).getId();
-		}
-
 		OperatorPrincipal operator = currentOperator(authentication);
 		if (operator == null) {
-			return ApiResponse.error(HttpStatus.UNAUTHORIZED, "Operator context is required to record a parking session.");
+			return ApiResponse.error(HttpStatus.UNAUTHORIZED,
+					"Operator context is required to record a parking session.");
+		}
+		
+		String gateIpAddress = httpRequest.getHeader(CommonConstants.GATE_IP_HEADER);
+		GateDTO gate = this.gateService.findByIpAddress(gateIpAddress);
+
+		if (gate == null) {
+			return ApiResponse.badRequest("No active shift found - please open a shift first.");
 		}
 
 		OperatorShiftDTO activeShift = resolveActiveShift(operator, httpRequest);
@@ -99,12 +105,19 @@ public class VisitorApiController {
 			return ApiResponse.badRequest("No active shift found - please open a shift first.");
 		}
 
+		ParkingAreaDTO parkingArea = parkingAreaService.getByGateId(gate.getId());
+
+		if (parkingArea == null) {
+			return ApiResponse.error(HttpStatus.NO_CONTENT, "No active parking area.");
+		}
+
 		ParkingSessionCreateDTO createDTO = new ParkingSessionCreateDTO();
 		createDTO.setVehicleId(vehicle.getId());
 		createDTO.setEntryGateId(activeShift.getGateId());
-		createDTO.setTariffId(tariffId);
 		createDTO.setOperatorId(operator.getOperator().getId());
 		createDTO.setEntryShiftId(activeShift.getId());
+		createDTO.setParkingSlotId(request.getParkingSlotId());
+		createDTO.setParkingAreaId(parkingArea.getId());
 
 		ParkingSessionDTO session = parkingSessionService.createEntry(createDTO);
 
@@ -112,7 +125,20 @@ public class VisitorApiController {
 	}
 
 	@GetMapping("/exit-preview")
-	public ResponseEntity<ApiResponse<VisitorExitPreviewResponseDTO>> exitPreview(@RequestParam String plateNumber) throws Exception {
+	public ResponseEntity<ApiResponse<VisitorExitPreviewResponseDTO>> exitPreview(@RequestParam String plateNumber,
+			HttpServletRequest httpRequest, Authentication authentication) throws Exception {
+
+		OperatorPrincipal operator = currentOperator(authentication);
+		if (operator == null) {
+			return ApiResponse.error(HttpStatus.UNAUTHORIZED,
+					"Operator context is required to record a parking session.");
+		}
+
+		OperatorShiftDTO activeShift = resolveActiveShift(operator, httpRequest);
+		if (activeShift == null) {
+			return ApiResponse.badRequest("No active shift found - please open a shift first.");
+		}
+
 		Optional<ParkingSessionDTO> activeSession = parkingSessionService.findActiveByPlateNumber(plateNumber);
 		if (activeSession.isEmpty()) {
 			return ApiResponse.notFound("No active parking session found for this plate.");
@@ -120,7 +146,7 @@ public class VisitorApiController {
 		ParkingSessionDTO session = activeSession.get();
 
 		long durationMinutes = parkingSessionService.getElapsedMinutes(session.getId());
-		BigDecimal amountDue = tariffService.calculateFee(session.getTariffId(), durationMinutes);
+		BigDecimal amountDue = tariffService.calculateFee(session.getParkingAreaId(), durationMinutes);
 
 		VisitorExitPreviewResponseDTO preview = new VisitorExitPreviewResponseDTO(session.getId(),
 				session.getPlateNumber(), session.getEntryTime(), durationMinutes, session.getTariffName(), amountDue);
@@ -131,7 +157,8 @@ public class VisitorApiController {
 	@PostMapping("/exit")
 	public ResponseEntity<ApiResponse<VisitorExitResponseDTO>> exit(@Valid @RequestBody VisitorExitRequestDTO request,
 			Authentication authentication, HttpServletRequest httpRequest) throws Exception {
-		Optional<ParkingSessionDTO> activeSessionOpt = parkingSessionService.findActiveByPlateNumber(request.getPlateNumber());
+		Optional<ParkingSessionDTO> activeSessionOpt = parkingSessionService
+				.findActiveByPlateNumber(request.getPlateNumber());
 		if (activeSessionOpt.isEmpty()) {
 			return ApiResponse.notFound("No active parking session found for this plate.");
 		}
@@ -142,7 +169,8 @@ public class VisitorApiController {
 
 		OperatorPrincipal operator = currentOperator(authentication);
 		if (operator == null) {
-			return ApiResponse.error(HttpStatus.UNAUTHORIZED, "Operator context is required to record a parking session.");
+			return ApiResponse.error(HttpStatus.UNAUTHORIZED,
+					"Operator context is required to record a parking session.");
 		}
 
 		OperatorShiftDTO activeShift = resolveActiveShift(operator, httpRequest);
@@ -157,7 +185,8 @@ public class VisitorApiController {
 		closeDTO.setExitShiftId(activeShift.getId());
 
 		ParkingSessionDTO closedSession = parkingSessionService.closeSession(closeDTO);
-		PaymentDTO payment = paymentService.recordPayment(activeSession.getId(), amountDue, request.getPaymentMethod(), request.getReferenceNo());
+		PaymentDTO payment = paymentService.recordPayment(activeSession.getId(), amountDue, request.getPaymentMethod(),
+				request.getReferenceNo());
 
 		return ApiResponse.ok(new VisitorExitResponseDTO(closedSession, payment), "Exit completed.");
 	}
@@ -165,7 +194,8 @@ public class VisitorApiController {
 	@PostMapping("/exit/waive")
 	public ResponseEntity<ApiResponse<VisitorExitResponseDTO>> waive(@Valid @RequestBody VisitorWaiveRequestDTO request,
 			Authentication authentication, HttpServletRequest httpRequest) throws Exception {
-		Optional<ParkingSessionDTO> activeSessionOpt = parkingSessionService.findActiveByPlateNumber(request.getPlateNumber());
+		Optional<ParkingSessionDTO> activeSessionOpt = parkingSessionService
+				.findActiveByPlateNumber(request.getPlateNumber());
 		if (activeSessionOpt.isEmpty()) {
 			return ApiResponse.notFound("No active parking session found for this plate.");
 		}
@@ -173,7 +203,8 @@ public class VisitorApiController {
 
 		OperatorPrincipal operator = currentOperator(authentication);
 		if (operator == null) {
-			return ApiResponse.error(HttpStatus.UNAUTHORIZED, "Operator context is required to record a parking session.");
+			return ApiResponse.error(HttpStatus.UNAUTHORIZED,
+					"Operator context is required to record a parking session.");
 		}
 
 		OperatorShiftDTO activeShift = resolveActiveShift(operator, httpRequest);

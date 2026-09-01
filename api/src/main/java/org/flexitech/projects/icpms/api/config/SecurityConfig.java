@@ -2,6 +2,7 @@ package org.flexitech.projects.icpms.api.config;
 
 import java.util.List;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.flexitech.projects.icpms.api.security.JwtAuthenticationFilter;
 import org.flexitech.projects.icpms.api.security.OperatorUserDetailsService;
 import org.flexitech.projects.icpms.dto.api.response.ApiResponse;
@@ -24,8 +25,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Configuration
 @EnableWebSecurity
+@Slf4j
 public class SecurityConfig {
 
 	private final OperatorUserDetailsService operatorUserDetailsService;
@@ -80,7 +84,8 @@ public class SecurityConfig {
 										"/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
 								.permitAll().anyRequest().authenticated())
 				.exceptionHandling(exception -> exception.authenticationEntryPoint((request, response, authException) -> {
-				    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+					log.error("Unauthorized error:: {}", ExceptionUtils.getStackTrace(authException));
+					response.setStatus(HttpStatus.UNAUTHORIZED.value());
 				    response.setContentType("application/json");
 				    response.setCharacterEncoding("UTF-8");
 				    response.getWriter().write(objectMapper

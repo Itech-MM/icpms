@@ -1,5 +1,7 @@
 package org.flexitech.projects.icpms.dto.member;
 
+import java.util.Date;
+
 import org.flexitech.projects.icpms.common.CommonConstants;
 import org.flexitech.projects.icpms.common.CommonValidators;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
@@ -35,6 +37,8 @@ public class MemberDTO extends CommonDTO {
 	private String reservedSlotNumber;
 	private Integer status = 1;
 	private String statusDesc;
+	
+	private Boolean isExpired = false;
 
 	public MemberDTO(Member member) {
 		super(member);
@@ -46,6 +50,8 @@ public class MemberDTO extends CommonDTO {
 		this.isVip = member.getIsVip();
 		if (CommonValidators.isValidObject(member.getValidUntil())) {
 			this.validUntil = DateUtils.dateToString(member.getValidUntil(), CommonConstants.STANDARD_DB_DATE_FORMAT);
+			Date now = new Date();
+			this.isExpired = member.getValidUntil().before(now);
 		}
 		if (CommonValidators.isValidObject(member.getReservedSlot())) {
 			this.reservedSlotId = member.getReservedSlot().getId();
