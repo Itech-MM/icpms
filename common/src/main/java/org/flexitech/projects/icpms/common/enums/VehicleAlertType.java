@@ -8,32 +8,32 @@ import org.flexitech.projects.icpms.common.CommonEnumObject;
 import lombok.Getter;
 
 @Getter
-public enum PaymentStatus {
-	PAID(1, "Paid"), PENDING(2, "Pending"),UNPAID(3, "Unpaid"), FOC(4, "FOC");;
-	// 1=paid,2=unpaid
+public enum VehicleAlertType {
+	UNKNOWN_PLATE(1, "Unknown Plate Detected"),
+	MEMBER_EXPIRED(2, "Member Expired During Session"),
+	BLACKLIST_DETECTED(3, "Blacklist Vehicle Detected");
+
 	private final Integer code;
 	private final String desc;
 
-	PaymentStatus(int i, String string) {
-		this.code = i;
-		this.desc = string;
+	VehicleAlertType(int code, String desc) {
+		this.code = code;
+		this.desc = desc;
 	}
 
 	public static List<CommonEnumObject> getAll() {
 		List<CommonEnumObject> result = new ArrayList<CommonEnumObject>();
-		for (PaymentStatus s : values()) {
-			result.add(new CommonEnumObject(s.code, s.desc));
+		for (VehicleAlertType t : values()) {
+			result.add(new CommonEnumObject(t.code, t.desc));
 		}
 		return result;
 	}
 
 	public static String getDescByCode(Integer code) {
-
-		for (PaymentStatus s : values()) {
-			if (s.code.equals(code))
-				return s.desc;
+		for (VehicleAlertType t : values()) {
+			if (t.code.equals(code))
+				return t.desc;
 		}
-
 		return null;
 	}
 }

@@ -14,10 +14,12 @@ import org.flexitech.projects.icpms.persistence.repositories.gate.GateDeviceRepo
 import org.flexitech.projects.icpms.persistence.repositories.gate.GateRepository;
 import org.flexitech.projects.icpms.service.auth.AuthenticationService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 public class GateDeviceServiceImpl implements GateDeviceService {
 
 	private final GateDeviceRepository gateDeviceRepository;
@@ -32,6 +34,7 @@ public class GateDeviceServiceImpl implements GateDeviceService {
 	}
 
 	@Override
+	@Transactional
 	public GateDeviceDTO manageDevice(GateDeviceDTO dto) throws Exception {
 		GateDevice device;
 		User user = this.authenticationService.getLoggedInUser();
@@ -88,6 +91,7 @@ public class GateDeviceServiceImpl implements GateDeviceService {
 	}
 
 	@Override
+	@Transactional
 	public boolean deleteDevice(Long id) throws Exception {
 		GateDevice device = this.gateDeviceRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Gate device doesn't exist!"));

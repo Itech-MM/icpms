@@ -8,10 +8,16 @@ import lombok.Setter;
 @Setter
 public class VisitorExitRequestDTO {
 
-	@NotBlank(message = "Plate number is required")
-	private String plateNumber;
+    @NotBlank(message = "Plate number is required")
+    private String plateNumber;
 
-	private Integer paymentMethod;
+    private Integer paymentMethod;
 
-	private String referenceNo;
+    private String referenceNo;
+
+    private String remark;
+    
+    private Boolean isMember;
+
+    private Boolean isFoc;
 }

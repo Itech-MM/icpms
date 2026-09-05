@@ -84,4 +84,15 @@ public class ParkingSession extends BasedEntity {
 	@ManyToOne
 	@JoinColumn(name = "parking_area_id")
 	private ParkingArea parkingArea;
+	
+	@Column(name = "member_status")
+	private Integer memberStatus;
+	
+	@Column(name = "foc_status")
+	private Integer focStatus;
+	
+	@Column(name = "duration_minutes")
+	private Long durationMinutes;
+	
+	private String remark;
 }

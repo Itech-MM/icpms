@@ -16,4 +16,6 @@ public interface VehicleService {
 	Optional<VehicleDTO> findByPlateNumber(String plateNumber);
 
 	VehicleDTO findOrCreateByPlateNumber(String plateNumber, String vehicleType) throws Exception;
+	
+	boolean isBlacklist(String plateNumber);
 }

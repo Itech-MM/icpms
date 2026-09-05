@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface VehicleRepository extends JpaRepository<Vehicle, Long>, JpaSpecificationExecutor<Vehicle> {
 	Optional<Vehicle> findByPlateNumberIgnoreCase(String plateNumber);
+	
+	boolean existsByPlateNumberAndBlackListStatus(String plateNumber, Integer blackListStatus);
 }

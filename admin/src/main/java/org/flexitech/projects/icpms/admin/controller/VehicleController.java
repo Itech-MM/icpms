@@ -2,6 +2,7 @@ package org.flexitech.projects.icpms.admin.controller;
 
 import org.flexitech.projects.icpms.common.CommonConstants;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
+import org.flexitech.projects.icpms.common.enums.BlacklistStatus;
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
 import org.flexitech.projects.icpms.dto.vehicle.VehicleDTO;
 import org.flexitech.projects.icpms.dto.vehicle.VehicleSearchDTO;
@@ -71,6 +72,7 @@ public class VehicleController {
 	private void loadFormRefData(Model model) {
 		model.addAttribute("statuses", ActiveStatus.getAll());
 		model.addAttribute("members", memberService.findAllActiveMembers());
+		model.addAttribute("blacklistStatusList", BlacklistStatus.getAll()); 
 		model.addAttribute("activeMenu", "vehicles");
 	}
 

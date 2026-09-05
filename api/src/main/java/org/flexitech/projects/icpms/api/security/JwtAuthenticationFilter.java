@@ -125,7 +125,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	            || path.equals("/actuator/health")
 	            || path.equals("/swagger-ui.html")
 	            || path.startsWith("/swagger-ui/")
-	            || path.startsWith("/v3/api-docs");
+	            || path.startsWith("/v3/api-docs")
+	            || path.startsWith("/ws");
 	}
 
 	private void writeError(HttpServletResponse response, HttpStatus status, String message) throws IOException {

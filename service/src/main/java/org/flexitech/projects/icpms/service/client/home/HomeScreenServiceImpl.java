@@ -12,6 +12,7 @@ import org.flexitech.projects.icpms.service.gate.GateDeviceService;
 import org.flexitech.projects.icpms.service.gate.GateService;
 import org.flexitech.projects.icpms.service.site.SiteService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class HomeScreenServiceImpl implements HomeScreenService {
 	
 	private final GateService gateService;

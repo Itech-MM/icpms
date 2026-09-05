@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.flexitech.projects.icpms.common.CommonValidators;
+import org.flexitech.projects.icpms.common.enums.ActiveStatus;
 import org.flexitech.projects.icpms.common.enums.ParkingSessionStatus;
 import org.flexitech.projects.icpms.common.enums.SlotStatus;
 import org.flexitech.projects.icpms.common.utils.CommonUtils;
@@ -15,11 +17,13 @@ import org.flexitech.projects.icpms.dto.session.ParkingSessionCreateDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionSearchDTO;
 import org.flexitech.projects.icpms.persistence.entities.gate.Gate;
+import org.flexitech.projects.icpms.persistence.entities.member.Member;
 import org.flexitech.projects.icpms.persistence.entities.operator.Operator;
 import org.flexitech.projects.icpms.persistence.entities.operator.OperatorShift;
 import org.flexitech.projects.icpms.persistence.entities.parking.ParkingArea;
 import org.flexitech.projects.icpms.persistence.entities.session.ParkingSession;
 import org.flexitech.projects.icpms.persistence.entities.slot.ParkingSlot;
+import org.flexitech.projects.icpms.persistence.entities.tariff.Tariff;
 import org.flexitech.projects.icpms.persistence.entities.vehicle.Vehicle;
 import org.flexitech.projects.icpms.persistence.repositories.gate.GateRepository;
 import org.flexitech.projects.icpms.persistence.repositories.operator.OperatorRepository;
@@ -27,6 +31,7 @@ import org.flexitech.projects.icpms.persistence.repositories.operator.OperatorSh
 import org.flexitech.projects.icpms.persistence.repositories.parking.ParkingAreaRepository;
 import org.flexitech.projects.icpms.persistence.repositories.session.ParkingSessionRepository;
 import org.flexitech.projects.icpms.persistence.repositories.slot.ParkingSlotRepository;
+import org.flexitech.projects.icpms.persistence.repositories.tariff.TariffRepository;
 import org.flexitech.projects.icpms.persistence.repositories.vehicle.VehicleRepository;
 import org.flexitech.projects.icpms.service.specifications.session.ParkingSessionSpecification;
 import org.springframework.data.domain.Page;
@@ -37,9 +42,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
+@Slf4j
 public class ParkingSessionServiceImpl implements ParkingSessionService {
 
 	private final ParkingSessionRepository sessionRepository;
@@ -49,6 +57,7 @@ public class ParkingSessionServiceImpl implements ParkingSessionService {
 	private final OperatorRepository operatorRepository;
 	private final OperatorShiftRepository operatorShiftRepository;
 	private final ParkingAreaRepository parkingAreaRepository;
+	private final TariffRepository tariffRepository;
 
 	@Override
 	public SearchResultDTO<ParkingSessionDTO> searchSessions(ParkingSessionSearchDTO searchDTO, Pageable pageable)
@@ -180,6 +189,7 @@ public class ParkingSessionServiceImpl implements ParkingSessionService {
 	}
 
 	@Override
+	@Transactional
 	public ParkingSessionDTO closeSession(ParkingSessionCloseDTO closeDTO) throws Exception {
 		ParkingSession session = this.sessionRepository.findById(closeDTO.getSessionId())
 				.orElseThrow(() -> new EntityNotFoundException("Parking session doesn't exist!"));
@@ -196,20 +206,79 @@ public class ParkingSessionServiceImpl implements ParkingSessionService {
 					.orElseThrow(() -> new EntityNotFoundException("Active shift doesn't exist!"));
 			session.setExitShift(exitShift);
 		}
-
+		
+		if(!CommonValidators.validLong(closeDTO.getTariffId())) {
+			throw new IllegalArgumentException("Invalid tariff.");
+		}
+		
+		Tariff tariff = tariffRepository.findById(closeDTO.getTariffId())
+				.orElseThrow(()-> new IllegalArgumentException("Invalid tariff."));
+		
+		ParkingArea parkingArea = session.getParkingArea();
+		
+		if (!CommonValidators.isValidObject(parkingArea)) {
+			throw new IllegalStateException("No parking area found.");
+		}
+		
 		session.setExitGate(exitGate);
 		session.setExitTime(new Date());
 		session.setExitPhotoUrl(closeDTO.getExitPhotoUrl());
 		session.setTotalAmount(closeDTO.getTotalAmount());
 		session.setStatus(ParkingSessionStatus.COMPLETED.getCode());
-
+		session.setMemberStatus(closeDTO.getIsMember() != null && closeDTO.getIsMember() ? ActiveStatus.ACTIVE.getCode() : ActiveStatus.INACTIVE.getCode());
+		session.setFocStatus(closeDTO.getIsFoc() != null && closeDTO.getIsFoc() ? ActiveStatus.ACTIVE.getCode() : ActiveStatus.INACTIVE.getCode());
+		session.setTariff(tariff);
+		session.setDurationMinutes(CommonUtils.getDefaultValue(closeDTO.getDurationMinutes(), 0L));
+		session.setRemark(closeDTO.getRemark());
+		
+		boolean isVip = false;
+		
 		if (session.getParkingSlot() != null) {
 			ParkingSlot slot = session.getParkingSlot();
 			slot.setStatus(SlotStatus.AVAILABLE.getCode());
 			slot.setUpdatedTime(new Date());
+			isVip = Boolean.TRUE.equals(slot.getIsVip());
 			this.slotRepository.save(slot);
 		}
+		
+		if (!isVip) {
+			Member m = session.getVehicle().getMember();
+			if (m != null) {
+				isVip = Boolean.TRUE.equals(m.getIsVip());
+			}
+		}
+		
+		Integer available = parkingArea.getAvailableTotalSlot();
+		Integer totalSlot = parkingArea.getTotalSlot() != null ? parkingArea.getTotalSlot() : 0;
+		
+		if (available == null) {
+			available = totalSlot;
+		}
 
+		if (available > totalSlot) {
+			log.warn("Available total slot greater than total slot!");
+		}
+		
+		parkingArea.setAvailableTotalSlot(available + 1);
+
+		if (isVip) {
+			Integer availableVip = parkingArea.getAvailableTotalVipSlot();
+			Integer totalVipSlot = parkingArea.getVipSlot() != null ? parkingArea.getVipSlot() : 0;
+
+			if (availableVip == null) {
+				availableVip = totalVipSlot;
+			}
+
+			if (availableVip > totalVipSlot) {
+				log.warn("Available total vip slot greater than total vip slot!");
+			}
+			
+			parkingArea.setAvailableTotalVipSlot(availableVip + 1);
+		}
+
+		parkingArea.setUpdatedTime(new Date());
+		this.parkingAreaRepository.save(parkingArea);
+		
 		ParkingSession saved = this.sessionRepository.save(session);
 		return new ParkingSessionDTO(saved);
 	}

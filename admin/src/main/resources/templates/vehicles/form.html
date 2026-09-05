@@ -42,6 +42,12 @@
                         <option th:each="s : ${statuses}" th:value="${s.code}" th:text="${s.desc}"></option>
                     </select>
                 </div>
+                <div class="col-md-6">
+                    <label class="form-label">Blacklist/Whitelist</label>
+                    <select th:field="*{blackListStatus}" class="form-select">
+                        <option th:each="b : ${blacklistStatusList}" th:value="${b.code}" th:text="${b.desc}"></option>
+                    </select>
+                </div>
 
                 <div class="col-12 mt-4">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save</button>

@@ -25,12 +25,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class TariffServiceImpl implements TariffService {
 
 	private final TariffRepository tariffRepository;
@@ -41,6 +43,7 @@ public class TariffServiceImpl implements TariffService {
 	
 	
 	@Override
+	@Transactional
 	public TariffDTO manageTariff(TariffDTO dto) throws Exception {
 		Tariff tariff;
 		User user = this.authenticationService.getLoggedInUser();
@@ -110,6 +113,7 @@ public class TariffServiceImpl implements TariffService {
 	}
 
 	@Override
+	@Transactional
 	public TariffRateDTO addRate(TariffRateDTO dto) throws Exception {
 		TariffRate rate;
 		if (CommonValidators.validLong(dto.getId())) {
@@ -131,6 +135,7 @@ public class TariffServiceImpl implements TariffService {
 	}
 
 	@Override
+	@Transactional
 	public boolean deleteRate(Long rateId) throws Exception {
 		TariffRate rate = this.tariffRateRepository.findById(rateId)
 				.orElseThrow(() -> new EntityNotFoundException("Tariff rate doesn't exist!"));

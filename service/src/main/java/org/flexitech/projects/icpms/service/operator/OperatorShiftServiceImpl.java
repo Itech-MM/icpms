@@ -18,6 +18,7 @@ import org.flexitech.projects.icpms.persistence.repositories.operator.OperatorRe
 import org.flexitech.projects.icpms.persistence.repositories.operator.OperatorShiftRepository;
 import org.flexitech.projects.icpms.persistence.repositories.session.ParkingSessionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class OperatorShiftServiceImpl implements OperatorShiftService {
 
 	private final OperatorRepository operatorRepository;
@@ -38,6 +40,7 @@ public class OperatorShiftServiceImpl implements OperatorShiftService {
 	private final QRCodeGenerator qrCodeGenerator;
 
 	@Override
+	@Transactional
 	public OperatorShiftDTO startShift(OperatorShiftDTO dto) {
 		Operator operator = operatorRepository.findById(dto.getOperatorId())
 				.orElseThrow(() -> new IllegalStateException("Operator not found: " + dto.getOperatorId()));
@@ -93,6 +96,7 @@ public class OperatorShiftServiceImpl implements OperatorShiftService {
 	}
 
 	@Override
+	@Transactional
 	public OperatorShiftDTO endShift(OperatorShiftDTO dto) {
 		OperatorShift shift = operatorShiftRepository.findById(dto.getId())
 				.orElseThrow(() -> new IllegalStateException("Shift not found: " + dto.getId()));

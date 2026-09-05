@@ -17,10 +17,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 public class PaymentServiceImpl implements PaymentService {
 
 	private final PaymentRepository paymentRepository;
@@ -55,6 +57,7 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 
 	@Override
+	@Transactional
 	public BigDecimal sumAmount(PaymentSearchDTO searchDTO) {
 		Specification<Payment> spec = PaymentSpecification.withSearchCriteria(searchDTO);
 		return this.paymentRepository.findAll(spec).stream()
@@ -64,6 +67,7 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 
 	@Override
+	@Transactional
 	public PaymentDTO recordPayment(Long sessionId, BigDecimal amount, Integer method, String referenceNo) throws Exception {
 		ParkingSession session = this.sessionRepository.findById(sessionId)
 				.orElseThrow(() -> new EntityNotFoundException("Parking session doesn't exist!"));

@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 public class ParkingSlotServiceImpl implements ParkingSlotService {
 
 	private final ParkingSlotRepository slotRepository;
@@ -46,6 +47,7 @@ public class ParkingSlotServiceImpl implements ParkingSlotService {
 	}
 
 	@Override
+	@Transactional
 	public ParkingSlotDTO manageSlot(ParkingSlotDTO dto) throws Exception {
 		ParkingSlot slot;
 		User user = this.authenticationService.getLoggedInUser();
@@ -113,6 +115,7 @@ public class ParkingSlotServiceImpl implements ParkingSlotService {
 	}
 
 	@Override
+	@Transactional
 	public boolean deleteSlot(Long id) throws Exception {
 		ParkingSlot slot = this.slotRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Parking slot doesn't exist!"));

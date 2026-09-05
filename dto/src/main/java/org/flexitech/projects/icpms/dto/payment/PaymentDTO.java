@@ -6,6 +6,7 @@ import org.flexitech.projects.icpms.common.CommonConstants;
 import org.flexitech.projects.icpms.common.CommonValidators;
 import org.flexitech.projects.icpms.common.enums.PaymentMethod;
 import org.flexitech.projects.icpms.common.enums.PaymentStatus;
+import org.flexitech.projects.icpms.common.utils.CommonUtils;
 import org.flexitech.projects.icpms.common.utils.DateUtils;
 import org.flexitech.projects.icpms.dto.CommonDTO;
 import org.flexitech.projects.icpms.persistence.entities.payment.Payment;
@@ -28,6 +29,7 @@ public class PaymentDTO extends CommonDTO {
 	private String siteName;
 	@NotNull
 	private BigDecimal amount;
+	private String amountDesc;
 	@NotNull
 	private Integer method;
 	private String methodDesc;
@@ -35,7 +37,7 @@ public class PaymentDTO extends CommonDTO {
 	private String referenceNo;
 	private Integer status = 2;
 	private String statusDesc;
-
+	
 	public PaymentDTO(Payment payment) {
 		super(payment);
 		if (CommonValidators.isValidObject(payment.getSession())) {
@@ -48,7 +50,8 @@ public class PaymentDTO extends CommonDTO {
 				this.siteName = payment.getSession().getEntryGate().getSite().getName();
 			}
 		}
-		this.amount = payment.getAmount();
+		this.amount = CommonUtils.getDefaultValue(payment.getAmount(), BigDecimal.ZERO);
+		this.amountDesc = CommonUtils.formatNumber(CommonUtils.getDefaultValue(payment.getAmount(), BigDecimal.ZERO));
 		this.method = payment.getMethod();
 		this.methodDesc = PaymentMethod.getDescByCode(method);
 		if (CommonValidators.isValidObject(payment.getPaymentTime())) {
@@ -57,5 +60,6 @@ public class PaymentDTO extends CommonDTO {
 		this.referenceNo = payment.getReferenceNo();
 		this.status = payment.getStatus();
 		this.statusDesc = PaymentStatus.getDescByCode(status);
+		
 	}
 }

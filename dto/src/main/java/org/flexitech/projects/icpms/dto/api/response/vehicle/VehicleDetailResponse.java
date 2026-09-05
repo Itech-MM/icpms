@@ -23,6 +23,8 @@ public class VehicleDetailResponse {
 	@JsonProperty("isVip")
 	private Boolean isVip = false;
 	
+	private Boolean isBlackList = false;
+	
 	public VehicleDetailResponse(VehicleDTO vehicle, MemberDTO member) {
 		if(CommonValidators.isValidObject(vehicle)) {
 			this.vehicle =vehicle;

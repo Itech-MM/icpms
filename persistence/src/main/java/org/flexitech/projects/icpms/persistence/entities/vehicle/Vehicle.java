@@ -29,4 +29,7 @@ public class Vehicle extends BasedEntity {
 	private Member member;
 
 	private Integer status = 1;
+	
+	@Column(name = "blacklist_status")
+	private Integer blackListStatus = 2;
 }

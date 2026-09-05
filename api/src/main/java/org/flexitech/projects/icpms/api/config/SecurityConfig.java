@@ -81,7 +81,8 @@ public class SecurityConfig {
 				.authorizeHttpRequests(
 						auth -> auth
 								.requestMatchers("/api/auth/login","/api/auth/validate", "/api/auth/refresh", "/actuator/health",
-										"/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
+										"/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**",
+										"/ws/**")
 								.permitAll().anyRequest().authenticated())
 				.exceptionHandling(exception -> exception.authenticationEntryPoint((request, response, authException) -> {
 					log.error("Unauthorized error:: {}", ExceptionUtils.getStackTrace(authException));

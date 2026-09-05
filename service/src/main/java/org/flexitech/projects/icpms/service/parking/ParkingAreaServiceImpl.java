@@ -24,12 +24,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 
 @Service
+@Transactional(readOnly = true)
 public class ParkingAreaServiceImpl implements ParkingAreaService {
 
 	private final ParkingAreaRepository parkingAreaRepository;
@@ -98,6 +100,7 @@ public class ParkingAreaServiceImpl implements ParkingAreaService {
 	}
 
 	@Override
+	@Transactional
 	public void manageParkingArea(ParkingAreaDTO dto) throws Exception {
 		ParkingArea entity;
 		if (dto.getId() != null) {
@@ -126,6 +129,7 @@ public class ParkingAreaServiceImpl implements ParkingAreaService {
 	}
 
 	@Override
+	@Transactional
 	public void deleteParkingArea(Long id) throws Exception {
 		if (!parkingAreaRepository.existsById(id)) {
 			throw new EntityNotFoundException("Parking area not found: " + id);

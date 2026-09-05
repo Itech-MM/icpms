@@ -11,10 +11,12 @@ import org.flexitech.projects.icpms.persistence.entities.user.User;
 import org.flexitech.projects.icpms.persistence.repositories.role.RoleRepository;
 import org.flexitech.projects.icpms.service.auth.AuthenticationService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 public class RoleServiceImpl implements RoleService {
 	
 	private final RoleRepository roleRepository;
@@ -26,6 +28,7 @@ public class RoleServiceImpl implements RoleService {
 	}
 	
 	@Override
+	@Transactional
 	public RoleDTO manageRole(RoleDTO roleDTO) throws Exception {
 		Role role = null;
 		User user = this.authenticationService.getLoggedInUser();
@@ -52,6 +55,7 @@ public class RoleServiceImpl implements RoleService {
 	}
 
 	@Override
+	@Transactional
 	public boolean deleteRole(Long id) throws Exception {
 		
 		Role role = this.roleRepository.findById(id)

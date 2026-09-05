@@ -20,10 +20,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 public class OperatorServiceImpl implements OperatorService {
 
 	private final OperatorRepository operatorRepository;
@@ -40,6 +42,7 @@ public class OperatorServiceImpl implements OperatorService {
 	}
 
 	@Override
+	@Transactional
 	public OperatorDTO manageOperator(OperatorDTO dto) throws Exception {
 		Operator operator;
 		User user = this.authenticationService.getLoggedInUser();
@@ -100,6 +103,7 @@ public class OperatorServiceImpl implements OperatorService {
 	}
 
 	@Override
+	@Transactional
 	public boolean deleteOperator(Long id) throws Exception {
 		Operator operator = this.operatorRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Operator doesn't exist!"));

@@ -22,10 +22,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 public class MemberServiceImpl implements MemberService {
 
 	private final MemberRepository memberRepository;
@@ -40,6 +42,7 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
+	@Transactional
 	public MemberDTO manageMember(MemberDTO dto) throws Exception {
 		Member member;
 		User user = this.authenticationService.getLoggedInUser();
@@ -110,6 +113,7 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
+	@Transactional
 	public boolean deleteMember(Long id) throws Exception {
 		Member member = this.memberRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Member doesn't exist!"));

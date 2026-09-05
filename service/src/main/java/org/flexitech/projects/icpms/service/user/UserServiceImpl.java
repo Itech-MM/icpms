@@ -20,11 +20,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
@@ -41,6 +43,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	@Transactional
 	public UserDTO manageUser(UserDTO userDTO) throws Exception {
 		User user = null;
 		User loggedUser = this.authenticationService.getLoggedInUser();
@@ -92,6 +95,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	@Transactional
 	public boolean deleteUser(Long id) throws Exception {
 		User user = this.userRepository.findById(id)
 				.orElseThrow(()-> new Exception("User not found!"));

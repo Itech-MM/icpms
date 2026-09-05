@@ -16,12 +16,21 @@ public class ApiResponse<T> {
 
 	private boolean success;
 	private String message;
+	private String errorCode;
 	private T data;
 	private Instant timestamp = Instant.now();
 
 	public ApiResponse(boolean success, String message, T data) {
 		this.success = success;
 		this.message = message;
+		this.data = data;
+		this.timestamp = Instant.now();
+	}
+
+	public ApiResponse(boolean success, String message, String errorCode, T data) {
+		this.success = success;
+		this.message = message;
+		this.errorCode = errorCode;
 		this.data = data;
 		this.timestamp = Instant.now();
 	}
@@ -42,16 +51,28 @@ public class ApiResponse<T> {
 		return ResponseEntity.status(status).body(new ApiResponse<>(false, message, data));
 	}
 
+	public static <T> ResponseEntity<ApiResponse<T>> error(HttpStatus status, String message, String errorCode) {
+		return ResponseEntity.status(status).body(new ApiResponse<>(false, message, errorCode, null));
+	}
+
 	public static <T> ResponseEntity<ApiResponse<T>> badRequest(String message) {
 		return error(HttpStatus.BAD_REQUEST, message);
 	}
-	
+
+	public static <T> ResponseEntity<ApiResponse<T>> badRequest(String message, String errorCode) {
+		return error(HttpStatus.BAD_REQUEST, message, errorCode);
+	}
+
 	public static <T> ResponseEntity<ApiResponse<T>> unauthorized(String message) {
 		return error(HttpStatus.UNAUTHORIZED, message);
 	}
 
 	public static <T> ResponseEntity<ApiResponse<T>> notFound(String message) {
 		return error(HttpStatus.NOT_FOUND, message);
+	}
+
+	public static <T> ResponseEntity<ApiResponse<T>> notFound(String message, String errorCode) {
+		return error(HttpStatus.NOT_FOUND, message, errorCode);
 	}
 
 	public static <T> ResponseEntity<ApiResponse<T>> conflict(String message) {

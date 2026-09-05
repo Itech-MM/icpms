@@ -24,10 +24,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 public class GateServiceImpl implements GateService {
 
 	private final GateRepository gateRepository;
@@ -46,6 +48,7 @@ public class GateServiceImpl implements GateService {
 	}
 
 	@Override
+	@Transactional
 	public GateDTO manageGate(GateDTO dto) throws Exception {
 		Gate gate;
 		User user = this.authenticationService.getLoggedInUser();
@@ -118,6 +121,7 @@ public class GateServiceImpl implements GateService {
 	}
 
 	@Override
+	@Transactional
 	public boolean deleteGate(Long id) throws Exception {
 		Gate gate = this.gateRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Gate doesn't exist!"));

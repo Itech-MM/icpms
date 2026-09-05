@@ -2,6 +2,7 @@ package org.flexitech.projects.icpms.dto.vehicle;
 
 import org.flexitech.projects.icpms.common.CommonValidators;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
+import org.flexitech.projects.icpms.common.enums.BlacklistStatus;
 import org.flexitech.projects.icpms.dto.CommonDTO;
 import org.flexitech.projects.icpms.persistence.entities.vehicle.Vehicle;
 
@@ -24,6 +25,8 @@ public class VehicleDTO extends CommonDTO {
 	private String memberName;
 	private Integer status = 1;
 	private String statusDesc;
+	private Integer blackListStatus;
+	private String blackListStatusDesc;
 
 	public VehicleDTO(Vehicle vehicle) {
 		super(vehicle);
@@ -35,5 +38,7 @@ public class VehicleDTO extends CommonDTO {
 		}
 		this.status = vehicle.getStatus();
 		this.statusDesc = ActiveStatus.getDescByCode(status);
+		this.blackListStatus = vehicle.getBlackListStatus();
+		this.blackListStatusDesc = BlacklistStatus.getDescByCode(blackListStatus);
 	}
 }

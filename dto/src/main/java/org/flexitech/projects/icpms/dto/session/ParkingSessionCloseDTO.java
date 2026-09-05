@@ -13,4 +13,9 @@ public class ParkingSessionCloseDTO {
     private BigDecimal totalAmount;
     private String exitPhotoUrl;
     private Long exitShiftId;
+    private Boolean isMember;
+    private Boolean isFoc;
+    private Long tariffId;
+    private Long durationMinutes;
+    private String remark;
 }

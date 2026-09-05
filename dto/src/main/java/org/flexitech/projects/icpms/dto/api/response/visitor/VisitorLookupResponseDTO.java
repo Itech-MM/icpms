@@ -9,9 +9,10 @@ import lombok.Setter;
 @Setter
 public class VisitorLookupResponseDTO {
 
-	private boolean hasActiveSession;
+	private Boolean hasActiveSession;
 	private ParkingSessionDTO activeSession;
-	private boolean member;
+	private Boolean member;
 	private String memberName;
-	private boolean vip;
+	private Boolean vip;
+	private Boolean blacklist;
 }

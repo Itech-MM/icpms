@@ -15,10 +15,12 @@ import org.flexitech.projects.icpms.persistence.repositories.slot.ParkingSlotRep
 import org.flexitech.projects.icpms.persistence.repositories.vehicle.VehicleRepository;
 import org.flexitech.projects.icpms.service.payment.PaymentService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
 @Service
+@Transactional(readOnly = true)
 public class DashboardServiceImpl implements DashboardService {
 
 	private final SiteRepository siteRepository;

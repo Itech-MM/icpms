@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.flexitech.projects.icpms.common.CommonValidators;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
+import org.flexitech.projects.icpms.common.enums.BlacklistStatus;
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
 import org.flexitech.projects.icpms.dto.vehicle.VehicleDTO;
 import org.flexitech.projects.icpms.dto.vehicle.VehicleSearchDTO;
@@ -20,10 +21,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 public class VehicleServiceImpl implements VehicleService {
 
 	private final VehicleRepository vehicleRepository;
@@ -38,6 +41,7 @@ public class VehicleServiceImpl implements VehicleService {
 	}
 
 	@Override
+	@Transactional
 	public VehicleDTO manageVehicle(VehicleDTO dto) throws Exception {
 		Vehicle vehicle;
 		User user = this.authenticationService.getLoggedInUser();
@@ -55,6 +59,8 @@ public class VehicleServiceImpl implements VehicleService {
 		vehicle.setVehicleType(dto.getVehicleType());
 		vehicle.setStatus(CommonValidators.isValidObject(dto.getStatus()) ? dto.getStatus() : ActiveStatus.ACTIVE.getCode());
 
+		vehicle.setBlackListStatus(CommonValidators.validInteger(dto.getBlackListStatus()) ? dto.getBlackListStatus() : BlacklistStatus.WHITELIST.getCode());
+		
 		if (CommonValidators.validLong(dto.getMemberId())) {
 			Member member = this.memberRepository.findById(dto.getMemberId())
 					.orElseThrow(() -> new EntityNotFoundException("Member doesn't exist!"));
@@ -91,6 +97,7 @@ public class VehicleServiceImpl implements VehicleService {
 	}
 
 	@Override
+	@Transactional
 	public boolean deleteVehicle(Long id) throws Exception {
 		Vehicle vehicle = this.vehicleRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Vehicle doesn't exist!"));
@@ -104,6 +111,7 @@ public class VehicleServiceImpl implements VehicleService {
 	}
 
 	@Override
+	@Transactional
 	public VehicleDTO findOrCreateByPlateNumber(String plateNumber, String vehicleType) throws Exception {
 		return this.vehicleRepository.findByPlateNumberIgnoreCase(plateNumber)
 				.map(VehicleDTO::new)
@@ -113,8 +121,19 @@ public class VehicleServiceImpl implements VehicleService {
 					vehicle.setPlateNumber(plateNumber);
 					vehicle.setVehicleType(vehicleType);
 					vehicle.setStatus(ActiveStatus.ACTIVE.getCode());
+					vehicle.setBlackListStatus(BlacklistStatus.WHITELIST.getCode());
 					Vehicle saved = this.vehicleRepository.save(vehicle);
 					return new VehicleDTO(saved);
 				});
+	}
+
+	@Override
+	public boolean isBlacklist(String plateNumber) {
+	    if (plateNumber == null || plateNumber.isBlank()) {
+	        return false;
+	    }
+
+	    return vehicleRepository.existsByPlateNumberAndBlackListStatus(
+	            plateNumber, BlacklistStatus.BLACKLIST.getCode());
 	}
 }

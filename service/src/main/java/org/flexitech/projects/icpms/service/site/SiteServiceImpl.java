@@ -18,10 +18,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 public class SiteServiceImpl implements SiteService {
 
 	private final SiteRepository siteRepository;
@@ -33,6 +35,7 @@ public class SiteServiceImpl implements SiteService {
 	}
 
 	@Override
+	@Transactional
 	public SiteDTO manageSite(SiteDTO dto) throws Exception {
 		Site site;
 		User user = this.authenticationService.getLoggedInUser();
@@ -92,6 +95,7 @@ public class SiteServiceImpl implements SiteService {
 	}
 
 	@Override
+	@Transactional
 	public boolean deleteSite(Long id) throws Exception {
 		Site site = this.siteRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Site doesn't exist!"));
