@@ -8,8 +8,10 @@ import org.flexitech.projects.icpms.dto.api.response.home.HomePreloadResponse;
 import org.flexitech.projects.icpms.dto.gate.GateDTO;
 import org.flexitech.projects.icpms.dto.gate.GateDeviceDTO;
 import org.flexitech.projects.icpms.dto.site.SiteDTO;
+import org.flexitech.projects.icpms.dto.system_setting.SystemSettingDTO;
 import org.flexitech.projects.icpms.service.gate.GateDeviceService;
 import org.flexitech.projects.icpms.service.gate.GateService;
+import org.flexitech.projects.icpms.service.setting.SystemSettingService;
 import org.flexitech.projects.icpms.service.site.SiteService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +32,8 @@ public class HomeScreenServiceImpl implements HomeScreenService {
 	
 	private final SiteService siteService;
 	
+	private final SystemSettingService systemSettingService;
+	
 	@Override
 	public HomePreloadResponse getHomePreloadData(HttpServletRequest request) throws Exception {
 		HomePreloadResponse response = new HomePreloadResponse();
@@ -47,6 +51,12 @@ public class HomeScreenServiceImpl implements HomeScreenService {
 		List<GateDeviceDTO> devices = gateDeviceService.getDevicesByGate(gate.getId());
 		
 		response.setDevices(devices);
+		
+		List<SystemSettingDTO> settings = this.systemSettingService.getAllOperatorSettings();
+		
+		if(CommonValidators.validList(settings)) {
+			response.setSettings(settings);
+		}
 		
 		if(CommonValidators.validLong(gate.getSiteId())) {
 			SiteDTO site = siteService.getSiteById(gate.getSiteId());

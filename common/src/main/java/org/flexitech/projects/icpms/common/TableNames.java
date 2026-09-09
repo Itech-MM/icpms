@@ -26,5 +26,7 @@ public class TableNames {
     public static final String PARKING_AREA_TBL = "parking_area";
     
     public static final String VEHICLE_ALERT_LOG_TBL = "vehicle_alert_logs";
+    
+    public static final String SYSTEM_SETTING_TBL = "system_settings";
 
 }

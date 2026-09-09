@@ -2,6 +2,7 @@ package org.flexitech.projects.icpms.service.session;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,7 @@ import org.flexitech.projects.icpms.dto.session.ParkingSessionCloseDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionCreateDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionSearchDTO;
+import org.flexitech.projects.icpms.dto.session.RecentSessionDTO;
 import org.flexitech.projects.icpms.persistence.entities.gate.Gate;
 import org.flexitech.projects.icpms.persistence.entities.member.Member;
 import org.flexitech.projects.icpms.persistence.entities.operator.Operator;
@@ -311,5 +313,21 @@ public class ParkingSessionServiceImpl implements ParkingSessionService {
 		summary.setTotalAmount(totalAmount);
 		summary.setTotalAmountDesc(CommonUtils.formatNumber(totalAmount));
 		return summary;
+	}
+
+	@Override
+	public SearchResultDTO<RecentSessionDTO> searchRecentVisitors(Long gateId, Pageable pageable) throws Exception {
+		List<Integer> statuses = List.of(ParkingSessionStatus.ACTIVE.getCode(), ParkingSessionStatus.COMPLETED.getCode());
+		Page<ParkingSession> page = sessionRepository.findRecentVisitorsByGate(statuses, gateId, pageable);
+
+		SearchResultDTO<RecentSessionDTO> result = new SearchResultDTO<>();
+		result.setPageNo(page.getNumber() + 1);
+		result.setLimit(page.getSize());
+		result.setTotalPage(page.getTotalPages());
+		result.setTotalRecords((int) page.getTotalElements());
+		result.setPageCount(page.getNumberOfElements());
+		result.setHasNextPage(page.hasNext());
+		result.setResults(page.getContent().stream().map(RecentSessionDTO::new).collect(Collectors.toList()));
+		return result;
 	}
 }

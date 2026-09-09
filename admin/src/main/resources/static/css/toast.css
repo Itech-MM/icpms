@@ -1,0 +1,83 @@
+.jconfirm.jconfirm-toast {
+    pointer-events: none; /* let clicks pass through to the page behind */
+}
+
+.jconfirm.jconfirm-toast .jconfirm-bg {
+    display: none; /* no dim/backdrop overlay */
+}
+
+.jconfirm.jconfirm-toast .jconfirm-scrollpane {
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 0;
+}
+
+.jconfirm.jconfirm-toast .jconfirm-row {
+    margin: 0;
+}
+
+.jconfirm.jconfirm-toast .jconfirm-box-container {
+    pointer-events: auto; /* toast itself is still interactive/dismissible */
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    left: auto !important;
+    margin: 0 !important;
+    max-width: 340px;
+    transition: margin-top .2s ease;
+}
+
+.jconfirm.jconfirm-toast .jconfirm-box {
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .15);
+    padding: 12px 14px;
+    border-top: none !important;
+    border-left: 4px solid #6c757d;
+}
+
+.jconfirm.jconfirm-toast .jconfirm-box.jconfirm-type-green  { border-left-color: #198754; }
+.jconfirm.jconfirm-toast .jconfirm-box.jconfirm-type-red    { border-left-color: #dc3545; }
+.jconfirm.jconfirm-toast .jconfirm-box.jconfirm-type-orange { border-left-color: #fd7e14; }
+.jconfirm.jconfirm-toast .jconfirm-box.jconfirm-type-blue   { border-left-color: #0d6efd; }
+
+.jconfirm.jconfirm-toast .jconfirm-title-c,
+.jconfirm.jconfirm-toast .jconfirm-buttons {
+    display: none; /* no title bar, no buttons — just the message */
+}
+
+.jconfirm.jconfirm-toast .jconfirm-content-pane {
+    margin: 0;
+}
+
+.jconfirm.jconfirm-toast .jconfirm-content {
+    margin: 0;
+}
+
+.jconfirm.jconfirm-toast .app-toast-body {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .875rem;
+    color: #212529;
+}
+
+.jconfirm.jconfirm-toast .app-toast-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.jconfirm.jconfirm-toast .jconfirm-box.jconfirm-type-green  .app-toast-icon { color: #198754; }
+.jconfirm.jconfirm-toast .jconfirm-box.jconfirm-type-red    .app-toast-icon { color: #dc3545; }
+.jconfirm.jconfirm-toast .jconfirm-box.jconfirm-type-orange .app-toast-icon { color: #fd7e14; }
+.jconfirm.jconfirm-toast .jconfirm-box.jconfirm-type-blue   .app-toast-icon { color: #0d6efd; }
+
+.jconfirm.jconfirm-toast .jconfirm-closeIcon {
+    top: 6px;
+    right: 8px;
+    font-size: .8rem;
+    opacity: .5;
+}
+
+.jconfirm.jconfirm-toast .jconfirm-closeIcon:hover {
+    opacity: 1;
+}

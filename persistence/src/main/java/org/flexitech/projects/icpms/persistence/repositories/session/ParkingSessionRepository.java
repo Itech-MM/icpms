@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.flexitech.projects.icpms.persistence.entities.session.ParkingSession;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -22,5 +24,11 @@ public interface ParkingSessionRepository extends JpaRepository<ParkingSession, 
 	
 	long countByEntryShiftIdAndStatus(Long entryShiftId, Integer status);
 	long countByExitShiftIdAndStatus(Long exitShiftId, Integer status);
+	
+	@Query("SELECT ps FROM ParkingSession ps WHERE ps.status IN :statuses " +
+	        "AND (ps.entryGate.id = :gateId OR ps.exitGate.id = :gateId) " +
+	        "ORDER BY COALESCE(ps.exitTime, ps.entryTime) DESC")
+	Page<ParkingSession> findRecentVisitorsByGate(@Param("statuses") List<Integer> statuses,
+	        @Param("gateId") Long gateId, Pageable pageable);
 	
 }

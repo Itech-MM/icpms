@@ -10,4 +10,6 @@ import lombok.Setter;
 public class VehicleSearchDTO {
 	private String plateNumber;
 	private Integer status;
+	private Integer fromSession; // 1=yes,2=no
+	private Long parkingAreaId;
 }

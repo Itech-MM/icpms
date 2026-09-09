@@ -9,6 +9,8 @@ import org.flexitech.projects.icpms.common.ApiErrorCode;
 import org.flexitech.projects.icpms.common.CommonConstants;
 import org.flexitech.projects.icpms.common.CommonValidators;
 import org.flexitech.projects.icpms.common.PlateNumberValidator;
+import org.flexitech.projects.icpms.common.utils.CommonUtils;
+import org.flexitech.projects.icpms.dto.SearchResultDTO;
 import org.flexitech.projects.icpms.dto.api.request.visitor.VisitorEntryRequestDTO;
 import org.flexitech.projects.icpms.dto.api.request.visitor.VisitorExitRequestDTO;
 import org.flexitech.projects.icpms.dto.api.request.visitor.VisitorWaiveRequestDTO;
@@ -23,6 +25,7 @@ import org.flexitech.projects.icpms.dto.payment.PaymentDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionCloseDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionCreateDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionDTO;
+import org.flexitech.projects.icpms.dto.session.RecentSessionDTO;
 import org.flexitech.projects.icpms.dto.vehicle.VehicleDTO;
 import org.flexitech.projects.icpms.service.audit_logs.VehicleAlertLogService;
 import org.flexitech.projects.icpms.service.gate.GateService;
@@ -33,6 +36,8 @@ import org.flexitech.projects.icpms.service.payment.PaymentService;
 import org.flexitech.projects.icpms.service.session.ParkingSessionService;
 import org.flexitech.projects.icpms.service.tariff.TariffService;
 import org.flexitech.projects.icpms.service.vehicle.VehicleService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -64,7 +69,7 @@ public class VisitorApiController {
 	private final ParkingAreaService parkingAreaService;
 
 	private final GateService gateService;
-	
+
 	private final VehicleAlertLogService vehicleAlertLogService;
 
 	@PostMapping("/entry")
@@ -140,18 +145,18 @@ public class VisitorApiController {
 			if (activeSession.isEmpty()) {
 				return ApiResponse.notFound("No active parking session found for this plate.");
 			}
-			
+
 			String gateIpAddress = httpRequest.getHeader(CommonConstants.GATE_IP_HEADER);
 			GateDTO gate = this.gateService.findByIpAddress(gateIpAddress);
 			if (gate == null) {
 				return ApiResponse.badRequest("Invalid gate.");
 			}
-			
+
 			if (PlateNumberValidator.isUnknownOrInvalid(plateNumber)) {
 				vehicleAlertLogService.logUnknownPlate(plateNumber, gate.getId(), operator.getOperator().getId());
 				return ApiResponse.badRequest("Unknown or invalid plate number detected.", ApiErrorCode.UNKNOWN_PLATE);
 			}
-			
+
 			ParkingSessionDTO session = activeSession.get();
 
 			long durationMinutes = parkingSessionService.getElapsedMinutes(session.getId());
@@ -159,7 +164,7 @@ public class VisitorApiController {
 
 			VisitorExitPreviewResponseDTO preview = new VisitorExitPreviewResponseDTO(session.getId(),
 					session.getPlateNumber(), session.getEntryTime(), durationMinutes, session.getTariffName(),
-					amountDue);
+					amountDue, CommonUtils.formatNumber(amountDue));
 
 			return ApiResponse.ok(preview);
 		} catch (Exception e) {
@@ -282,6 +287,29 @@ public class VisitorApiController {
 			return ApiResponse.ok(new VisitorExitResponseDTO(closedSession, payment), "Fee waived, exit completed.");
 		} catch (Exception e) {
 			log.error("Error on visitor waive:: {}", ExceptionUtils.getStackTrace(e));
+			return ApiResponse.internalError(e.getMessage());
+		}
+	}
+
+	@GetMapping("/recent")
+	public ResponseEntity<ApiResponse<SearchResultDTO<RecentSessionDTO>>> recentVisitors(@RequestParam Integer page,
+			HttpServletRequest httpRequest) {
+		try {
+			String gateIpAddress = httpRequest.getHeader(CommonConstants.GATE_IP_HEADER);
+			GateDTO gate = this.gateService.findByIpAddress(gateIpAddress);
+
+			if (gate == null) {
+				return ApiResponse.badRequest("Invalid gate.");
+			}
+
+			Pageable pageable = PageRequest.of(page - 1, CommonConstants.ROW_PER_PAGE);
+
+			SearchResultDTO<RecentSessionDTO> result = parkingSessionService.searchRecentVisitors(gate.getId(),
+					pageable);
+
+			return ApiResponse.ok(result, "Recent visitors retrieved.");
+		} catch (Exception e) {
+			log.error("Error on recent visitors:: {}", ExceptionUtils.getStackTrace(e));
 			return ApiResponse.internalError(e.getMessage());
 		}
 	}

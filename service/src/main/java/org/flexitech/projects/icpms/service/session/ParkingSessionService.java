@@ -8,6 +8,7 @@ import org.flexitech.projects.icpms.dto.session.ParkingSessionCloseDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionCreateDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionSearchDTO;
+import org.flexitech.projects.icpms.dto.session.RecentSessionDTO;
 import org.springframework.data.domain.Pageable;
 
 public interface ParkingSessionService {
@@ -25,4 +26,6 @@ public interface ParkingSessionService {
     
 
 	OperatorShiftSummaryDTO getShiftSummary(Long shiftId);
+	
+	SearchResultDTO<RecentSessionDTO> searchRecentVisitors(Long gateId, Pageable pageable) throws Exception;
 }

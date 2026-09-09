@@ -19,4 +19,5 @@ public class VisitorExitPreviewResponseDTO {
 	private long durationMinutes;
 	private String tariffName;
 	private BigDecimal amountDue;
+	private String amountDueDesc;
 }
