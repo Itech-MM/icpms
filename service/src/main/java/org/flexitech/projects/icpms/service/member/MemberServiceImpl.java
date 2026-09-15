@@ -2,20 +2,26 @@ package org.flexitech.projects.icpms.service.member;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.flexitech.projects.icpms.common.CommonConstants;
 import org.flexitech.projects.icpms.common.CommonValidators;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
+import org.flexitech.projects.icpms.common.enums.BlacklistStatus;
 import org.flexitech.projects.icpms.common.utils.DateUtils;
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
 import org.flexitech.projects.icpms.dto.member.MemberDTO;
 import org.flexitech.projects.icpms.dto.member.MemberSearchDTO;
+import org.flexitech.projects.icpms.dto.member.MembersSummaryDTO;
+import org.flexitech.projects.icpms.dto.vehicle.VehicleDTO;
 import org.flexitech.projects.icpms.persistence.entities.member.Member;
 import org.flexitech.projects.icpms.persistence.entities.slot.ParkingSlot;
 import org.flexitech.projects.icpms.persistence.entities.user.User;
+import org.flexitech.projects.icpms.persistence.entities.vehicle.Vehicle;
 import org.flexitech.projects.icpms.persistence.repositories.member.MemberRepository;
 import org.flexitech.projects.icpms.persistence.repositories.slot.ParkingSlotRepository;
+import org.flexitech.projects.icpms.persistence.repositories.vehicle.VehicleRepository;
 import org.flexitech.projects.icpms.service.auth.AuthenticationService;
 import org.flexitech.projects.icpms.service.specifications.member.MemberSpecification;
 import org.springframework.data.domain.Page;
@@ -33,17 +39,19 @@ public class MemberServiceImpl implements MemberService {
 	private final MemberRepository memberRepository;
 	private final ParkingSlotRepository slotRepository;
 	private final AuthenticationService authenticationService;
+	private final VehicleRepository vehicleRepository;
 
 	public MemberServiceImpl(MemberRepository memberRepository, ParkingSlotRepository slotRepository,
-			AuthenticationService authenticationService) {
+			AuthenticationService authenticationService, VehicleRepository vehicleRepository) {
 		this.memberRepository = memberRepository;
 		this.slotRepository = slotRepository;
 		this.authenticationService = authenticationService;
+		this.vehicleRepository = vehicleRepository;
 	}
 
 	@Override
 	@Transactional
-	public MemberDTO manageMember(MemberDTO dto) throws Exception {
+	public MemberDTO manageMember(MemberDTO dto, List<VehicleDTO> vehicles) throws Exception {
 		Member member;
 		User user = this.authenticationService.getLoggedInUser();
 		if (CommonValidators.validLong(dto.getId())) {
@@ -78,7 +86,42 @@ public class MemberServiceImpl implements MemberService {
 		}
 
 		Member saved = this.memberRepository.save(member);
+
+		if (CommonValidators.validList(vehicles)) {
+			linkVehiclesToMember(saved, vehicles, user);
+		}
+
 		return new MemberDTO(saved);
+	}
+
+	private void linkVehiclesToMember(Member member, List<VehicleDTO> vehicles, User user) {
+		for (VehicleDTO vehicleDTO : vehicles) {
+			if (!CommonValidators.validString(vehicleDTO.getPlateNumber())) {
+				continue;
+			}
+
+			Optional<Vehicle> existing = this.vehicleRepository.findByPlateNumberIgnoreCase(vehicleDTO.getPlateNumber());
+			Vehicle vehicle;
+			if (existing.isPresent()) {
+				vehicle = existing.get();
+				vehicle.setUpdatedTime(new Date());
+				vehicle.setUpdatedBy(user);
+			} else {
+				vehicle = new Vehicle();
+				vehicle.setCreatedTime(new Date());
+				vehicle.setCreatedBy(user);
+				vehicle.setPlateNumber(vehicleDTO.getPlateNumber());
+				vehicle.setStatus(ActiveStatus.ACTIVE.getCode());
+				vehicle.setBlackListStatus(BlacklistStatus.WHITELIST.getCode());
+			}
+
+			if (CommonValidators.validString(vehicleDTO.getVehicleType())) {
+				vehicle.setVehicleType(vehicleDTO.getVehicleType());
+			}
+			vehicle.setMember(member);
+
+			this.vehicleRepository.save(vehicle);
+		}
 	}
 
 	@Override
@@ -119,5 +162,16 @@ public class MemberServiceImpl implements MemberService {
 				.orElseThrow(() -> new EntityNotFoundException("Member doesn't exist!"));
 		this.memberRepository.delete(member);
 		return true;
+	}
+	
+	@Override
+	public MembersSummaryDTO getMembersSummary() {
+		long total = memberRepository.count();
+		long regular = memberRepository.count(MemberSpecification.isRegular());
+		long vip = memberRepository.count(MemberSpecification.isVip());
+		long expired = memberRepository.count(MemberSpecification.isExpired());
+		long active = memberRepository.count(MemberSpecification.isActive());
+
+		return new MembersSummaryDTO(total, regular, vip, expired, active);
 	}
 }

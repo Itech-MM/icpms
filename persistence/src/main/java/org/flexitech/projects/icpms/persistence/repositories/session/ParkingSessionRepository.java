@@ -27,8 +27,9 @@ public interface ParkingSessionRepository extends JpaRepository<ParkingSession, 
 	
 	@Query("SELECT ps FROM ParkingSession ps WHERE ps.status IN :statuses " +
 	        "AND (ps.entryGate.id = :gateId OR ps.exitGate.id = :gateId) " +
+	        "AND (ps.entryShift.id = :activeShiftId OR ps.exitShift.id = :activeShiftId) " +
 	        "ORDER BY COALESCE(ps.exitTime, ps.entryTime) DESC")
 	Page<ParkingSession> findRecentVisitorsByGate(@Param("statuses") List<Integer> statuses,
-	        @Param("gateId") Long gateId, Pageable pageable);
+	        @Param("gateId") Long gateId, @Param("activeShiftId") Long activeShiftId, Pageable pageable);
 	
 }

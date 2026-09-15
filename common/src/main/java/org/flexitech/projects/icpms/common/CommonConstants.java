@@ -29,4 +29,5 @@ public class CommonConstants {
 
 	public static final Integer MAX_RETRY = 5;
 	
+	public static final int MEMBER_BALANCE = 5;
 }

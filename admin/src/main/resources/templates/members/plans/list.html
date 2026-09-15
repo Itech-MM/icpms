@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Member Plans</h4>
+        <div>
+            <a th:href="@{/members}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to Members</a>
+            <a th:href="@{/members/plans/new}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Plan</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Duration (days)</th>
+                            <th>Granted Balance</th>
+                            <th>Max Vehicles</th>
+                            <th>Active</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="plan : ${plans}">
+                            <td th:text="${plan.code}"></td>
+                            <td th:text="${plan.name}"></td>
+                            <td th:text="${plan.price}"></td>
+                            <td th:text="${plan.durationDays}"></td>
+                            <td th:text="${plan.grantedBalance}"></td>
+                            <td th:text="${plan.maxVehicles}"></td>
+                            <td>
+                                <span class="badge" th:classappend="${plan.isActive} ? 'bg-success' : 'bg-secondary'"
+                                      th:text="${plan.isActive} ? 'Active' : 'Inactive'"></span>
+                            </td>
+                            <td class="text-end">
+                                <a th:href="@{'/members/plans/' + ${plan.id} + '/edit'}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <form th:if="${plan.isActive}" th:action="@{'/members/plans/' + ${plan.id} + '/deactivate'}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Deactivate this plan?"><i class="bi bi-slash-circle"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(plans)}">
+                            <td colspan="8" class="text-center text-muted py-4">No member plans found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

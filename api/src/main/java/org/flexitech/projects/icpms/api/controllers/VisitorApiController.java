@@ -1,6 +1,7 @@
 package org.flexitech.projects.icpms.api.controllers;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -9,8 +10,12 @@ import org.flexitech.projects.icpms.common.ApiErrorCode;
 import org.flexitech.projects.icpms.common.CommonConstants;
 import org.flexitech.projects.icpms.common.CommonValidators;
 import org.flexitech.projects.icpms.common.PlateNumberValidator;
+import org.flexitech.projects.icpms.common.enums.PaymentMethod;
+import org.flexitech.projects.icpms.common.exceptions.NoActiveSubscriptionException;
 import org.flexitech.projects.icpms.common.utils.CommonUtils;
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
+import org.flexitech.projects.icpms.dto.api.request.member.ChargeMemberSessionRequest;
+import org.flexitech.projects.icpms.dto.api.request.member.ChargeResultDTO;
 import org.flexitech.projects.icpms.dto.api.request.visitor.VisitorEntryRequestDTO;
 import org.flexitech.projects.icpms.dto.api.request.visitor.VisitorExitRequestDTO;
 import org.flexitech.projects.icpms.dto.api.request.visitor.VisitorWaiveRequestDTO;
@@ -19,17 +24,20 @@ import org.flexitech.projects.icpms.dto.api.response.visitor.VisitorExitPreviewR
 import org.flexitech.projects.icpms.dto.api.response.visitor.VisitorExitResponseDTO;
 import org.flexitech.projects.icpms.dto.gate.GateDTO;
 import org.flexitech.projects.icpms.dto.member.MemberDTO;
+import org.flexitech.projects.icpms.dto.member.MemberSubscriptionDTO;
 import org.flexitech.projects.icpms.dto.operator.OperatorShiftDTO;
 import org.flexitech.projects.icpms.dto.parking.ParkingAreaDTO;
 import org.flexitech.projects.icpms.dto.payment.PaymentDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionCloseDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionCreateDTO;
 import org.flexitech.projects.icpms.dto.session.ParkingSessionDTO;
+import org.flexitech.projects.icpms.dto.session.ParkingSessionSearchDTO;
 import org.flexitech.projects.icpms.dto.session.RecentSessionDTO;
 import org.flexitech.projects.icpms.dto.vehicle.VehicleDTO;
 import org.flexitech.projects.icpms.service.audit_logs.VehicleAlertLogService;
 import org.flexitech.projects.icpms.service.gate.GateService;
 import org.flexitech.projects.icpms.service.member.MemberService;
+import org.flexitech.projects.icpms.service.member.MemberSubscriptionService;
 import org.flexitech.projects.icpms.service.operator.OperatorShiftService;
 import org.flexitech.projects.icpms.service.parking.ParkingAreaService;
 import org.flexitech.projects.icpms.service.payment.PaymentService;
@@ -61,6 +69,7 @@ public class VisitorApiController {
 
 	private final VehicleService vehicleService;
 	private final MemberService memberService;
+	private final MemberSubscriptionService memberSubscriptionService;
 	private final ParkingSessionService parkingSessionService;
 	private final TariffService tariffService;
 	private final PaymentService paymentService;
@@ -195,14 +204,26 @@ public class VisitorApiController {
 				return ApiResponse.badRequest("No active shift found - please open a shift first.");
 			}
 
+			MemberDTO member = null;
+			boolean isMemberVehicle = false;
+			MemberSubscriptionDTO activeSubscription = null;
 			if (request.getIsMember()) {
 				Optional<VehicleDTO> vehicle = vehicleService.findByPlateNumber(request.getPlateNumber());
 				if (vehicle.isPresent() && CommonValidators.validLong(vehicle.get().getMemberId())) {
-					MemberDTO member = memberService.getMemberById(vehicle.get().getMemberId());
-					if (member.getIsExpired()) {
+					member = memberService.getMemberById(vehicle.get().getMemberId());
+					if (Boolean.TRUE.equals(member.getIsExpired())) {
 						vehicleAlertLogService.logMemberExpired(request.getPlateNumber(), vehicle.get().getId(),
 								member.getId(), activeSession.getId(), activeShift.getGateId(),
 								operator.getOperator().getId());
+						return ApiResponse.badRequest("Member's subscription has expired.", ApiErrorCode.MEMBER_EXPIRED);
+					}
+
+					try {
+						activeSubscription = memberSubscriptionService.getActiveSubscription(member.getId());
+						isMemberVehicle = true;
+					} catch (NoActiveSubscriptionException ex) {
+						return ApiResponse.badRequest("Member has no active subscription.",
+								ApiErrorCode.NO_ACTIVE_SUBSCRIPTION);
 					}
 				}
 			}
@@ -220,9 +241,38 @@ public class VisitorApiController {
 			}
 
 			long durationMinutes = parkingSessionService.getElapsedMinutes(activeSession.getId());
-			BigDecimal amountDue = !request.getIsFoc() && !request.getIsMember()
-					? tariffService.calculateFee(tariffId, durationMinutes)
-					: BigDecimal.ZERO;
+
+			long billableMinutes = durationMinutes;
+			BigDecimal discountPercent = BigDecimal.ZERO;
+			if (isMemberVehicle && activeSubscription != null) {
+				if (CommonValidators.isValidObject(activeSubscription.getFreeMinutes())) {
+					billableMinutes = Math.max(0, durationMinutes - activeSubscription.getFreeMinutes());
+				}
+				if (CommonValidators.isValidObject(activeSubscription.getDiscountPercent())) {
+					discountPercent = activeSubscription.getDiscountPercent();
+				}
+			}
+
+			BigDecimal amountDue = !request.getIsFoc() ? tariffService.calculateFee(tariffId, billableMinutes) : BigDecimal.ZERO;
+			if (isMemberVehicle && discountPercent.compareTo(BigDecimal.ZERO) > 0) {
+				BigDecimal multiplier = BigDecimal.ONE.subtract(discountPercent.divide(BigDecimal.valueOf(100)));
+				amountDue = amountDue.multiply(multiplier).setScale(2, RoundingMode.HALF_UP);
+			}
+
+			Integer paymentMethod = request.getPaymentMethod();
+
+			if (isMemberVehicle && !request.getIsFoc() && amountDue.compareTo(BigDecimal.ZERO) > 0) {
+				ChargeMemberSessionRequest chargeRequest = new ChargeMemberSessionRequest();
+				chargeRequest.setMemberId(member.getId());
+				chargeRequest.setSessionId(activeSession.getId());
+				chargeRequest.setAmount(amountDue);
+				ChargeResultDTO chargeResult = memberSubscriptionService.chargeSessionFee(chargeRequest);
+				if (!chargeResult.isSuccess()) {
+					return ApiResponse.badRequest("Unable to charge member balance: " + chargeResult.getFailureReason(),
+							ApiErrorCode.INSUFFICIENT_MEMBER_BALANCE);
+				}
+				paymentMethod = PaymentMethod.MEMBER.getCode();
+			}
 
 			ParkingSessionCloseDTO closeDTO = new ParkingSessionCloseDTO();
 			closeDTO.setSessionId(activeSession.getId());
@@ -236,8 +286,8 @@ public class VisitorApiController {
 			closeDTO.setRemark(request.getRemark());
 
 			ParkingSessionDTO closedSession = parkingSessionService.closeSession(closeDTO);
-			PaymentDTO payment = paymentService.recordPayment(activeSession.getId(), amountDue,
-					request.getPaymentMethod(), request.getReferenceNo());
+			PaymentDTO payment = paymentService.recordPayment(activeSession.getId(), amountDue, paymentMethod,
+					request.getReferenceNo());
 
 			return ApiResponse.ok(new VisitorExitResponseDTO(closedSession, payment), "Exit completed.");
 		} catch (Exception e) {
@@ -292,7 +342,7 @@ public class VisitorApiController {
 	}
 
 	@GetMapping("/recent")
-	public ResponseEntity<ApiResponse<SearchResultDTO<RecentSessionDTO>>> recentVisitors(@RequestParam Integer page,
+	public ResponseEntity<ApiResponse<SearchResultDTO<RecentSessionDTO>>> recentVisitors(@RequestParam Integer page, Authentication authentication,
 			HttpServletRequest httpRequest) {
 		try {
 			String gateIpAddress = httpRequest.getHeader(CommonConstants.GATE_IP_HEADER);
@@ -302,14 +352,55 @@ public class VisitorApiController {
 				return ApiResponse.badRequest("Invalid gate.");
 			}
 
+			OperatorPrincipal operator = currentOperator(authentication);
+
+			OperatorShiftDTO activeShift = resolveActiveShift(operator, httpRequest);
+
 			Pageable pageable = PageRequest.of(page - 1, CommonConstants.ROW_PER_PAGE);
 
 			SearchResultDTO<RecentSessionDTO> result = parkingSessionService.searchRecentVisitors(gate.getId(),
-					pageable);
+					activeShift.getId(), pageable);
 
 			return ApiResponse.ok(result, "Recent visitors retrieved.");
 		} catch (Exception e) {
 			log.error("Error on recent visitors:: {}", ExceptionUtils.getStackTrace(e));
+			return ApiResponse.internalError(e.getMessage());
+		}
+	}
+
+	@PostMapping("/search")
+	public ResponseEntity<ApiResponse<SearchResultDTO<ParkingSessionDTO>>> searchVisitor(@RequestBody ParkingSessionSearchDTO searchDTO, Authentication authentication, HttpServletRequest httpRequest){
+
+		try {
+
+			OperatorPrincipal operator = currentOperator(authentication);
+			if (operator == null) {
+				return ApiResponse.error(HttpStatus.UNAUTHORIZED,
+						"Operator context is required to record a parking session.");
+			}
+
+			String gateIpAddress = httpRequest.getHeader(CommonConstants.GATE_IP_HEADER);
+			GateDTO gate = this.gateService.findByIpAddress(gateIpAddress);
+
+			if (gate == null) {
+				return ApiResponse.badRequest("No active shift found - please open a shift first.");
+			}
+
+			OperatorShiftDTO activeShitf = resolveActiveShift(operator, httpRequest);
+
+			if(activeShitf == null)
+				return ApiResponse.unauthorized("No active shift, please open your shift.");
+
+			searchDTO.setGateId(gate.getId());
+			searchDTO.setActiveShiftId(activeShitf.getId());
+
+			Pageable page = PageRequest.of(CommonUtils.getDefaultValue(searchDTO.getPageNo(), 1) - 1, CommonConstants.ROW_PER_PAGE);
+
+			SearchResultDTO<ParkingSessionDTO> result = this.parkingSessionService.searchSessions(searchDTO, page);
+
+			return ApiResponse.ok(result, "Search visitor success.");
+		}catch (Exception e) {
+			log.error("Error search visitor:: {}", ExceptionUtils.getStackTrace(e));
 			return ApiResponse.internalError(e.getMessage());
 		}
 	}

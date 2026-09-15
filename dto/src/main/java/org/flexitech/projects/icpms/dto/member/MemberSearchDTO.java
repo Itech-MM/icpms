@@ -11,4 +11,5 @@ public class MemberSearchDTO {
 	private String name;
 	private String phoneNumber;
 	private Integer status;
+	private String keyword;
 }

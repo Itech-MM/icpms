@@ -16,6 +16,8 @@ public class AuthResponseDTO {
 	private String accessToken;
 	private String refreshToken;
 	private String username;
+	private String operatorName;
+	private Long operatorId;
 	private List<String> roles;
 	private long expiresIn;
 	private boolean startShift;

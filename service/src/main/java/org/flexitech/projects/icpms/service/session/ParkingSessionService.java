@@ -27,5 +27,5 @@ public interface ParkingSessionService {
 
 	OperatorShiftSummaryDTO getShiftSummary(Long shiftId);
 	
-	SearchResultDTO<RecentSessionDTO> searchRecentVisitors(Long gateId, Pageable pageable) throws Exception;
+	SearchResultDTO<RecentSessionDTO> searchRecentVisitors(Long gateId, Long activeShiftId, Pageable pageable) throws Exception;
 }

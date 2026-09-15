@@ -1,0 +1,31 @@
+server:
+  port: 8087
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/icpms?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+image:
+  path: D:/FlexiTech/Company Data/Projects/ICPMS/images
+  context:
+    path: icpms-images
+
+app:
+  jwt:
+    secret: c2VjdXJlLXNlY3JldC1rZXktZm9yLWljcG1zLWFwaS1hdC1sZWFzdC01MTItYml0cy1sb25nLWZvci1oczUxMi1zaWduaW5n
+
+logging:
+  level:
+    root: WARN
+    org.springframework: WARN
+    org.springframework.web: WARN
+    org.hibernate: WARN
+    org.hibernate.SQL: WARN
+    com.zaxxer.hikari: WARN
+    com.mysql.cj: WARN
+    org.apache.tomcat: WARN
+    org.apache.catalina: WARN
+    com.flexitech.icpms: INFO

@@ -9,14 +9,18 @@ import org.flexitech.projects.icpms.api.security.OperatorPrincipal;
 import org.flexitech.projects.icpms.api.security.OperatorUserDetailsService;
 import org.flexitech.projects.icpms.common.CommonConstants;
 import org.flexitech.projects.icpms.common.CommonValidators;
+import org.flexitech.projects.icpms.common.enums.OperatorRole;
 import org.flexitech.projects.icpms.dto.api.request.auth.LoginRequestDTO;
 import org.flexitech.projects.icpms.dto.api.request.auth.LogoutRequestDTO;
 import org.flexitech.projects.icpms.dto.api.request.auth.RefreshTokenRequestDTO;
+import org.flexitech.projects.icpms.dto.api.request.auth.SupervisorValidationRequestDTO;
 import org.flexitech.projects.icpms.dto.api.response.ApiResponse;
 import org.flexitech.projects.icpms.dto.api.response.auth.AuthResponseDTO;
+import org.flexitech.projects.icpms.dto.api.response.auth.SupervisorValidationResponseDTO;
 import org.flexitech.projects.icpms.dto.operator.OperatorShiftDTO;
 import org.flexitech.projects.icpms.service.operator.OperatorShiftService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -85,10 +89,39 @@ public class AuthApiController {
 			activeShift = operatorShiftService.getActiveShiftByOperator(principal.getOperator().getId(), gateIpAddress);
 		}
 
-		AuthResponseDTO response = new AuthResponseDTO(accessToken, refreshToken, principal.getUsername(), roles,
+		AuthResponseDTO response = new AuthResponseDTO(accessToken, refreshToken, principal.getUsername(), 
+				principal.getOperator().getName(), principal.getOperator().getId(), roles,
 				jwtExpirationMs, startShift, activeShift);
 
 		return ApiResponse.ok(response, "Login successful.");
+	}
+
+	@PostMapping("/validate-supervisor")
+	public ResponseEntity<ApiResponse<SupervisorValidationResponseDTO>> validateSupervisor(
+			@Valid @RequestBody SupervisorValidationRequestDTO request, Authentication authentication) {
+
+		if (authentication == null || !(authentication.getPrincipal() instanceof OperatorPrincipal)) {
+			return ApiResponse.error(HttpStatus.UNAUTHORIZED, "Operator context is required.");
+		}
+
+		Authentication supervisorAuthentication;
+		try {
+			supervisorAuthentication = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+		} catch (BadCredentialsException e) {
+			return ApiResponse.internalError("Invalid supervisor username or password.");
+		}
+
+		OperatorPrincipal supervisorPrincipal = (OperatorPrincipal) supervisorAuthentication.getPrincipal();
+
+		if (!OperatorRole.SUPERVISOR.getCode().equals(supervisorPrincipal.getOperator().getRole())) {
+			return ApiResponse.error(HttpStatus.FORBIDDEN, "The provided credentials do not belong to a supervisor.");
+		}
+
+		SupervisorValidationResponseDTO response = new SupervisorValidationResponseDTO(
+				supervisorPrincipal.getOperator().getId(), supervisorPrincipal.getOperator().getName());
+
+		return ApiResponse.ok(response, "Supervisor validated.");
 	}
 	
 	@GetMapping("/validate")
@@ -121,7 +154,7 @@ public class AuthApiController {
 	        activeShift = operatorShiftService.getActiveShiftByOperator(principal.getOperator().getId(), gateIpAddress);
 	    }
 
-	    AuthResponseDTO response = new AuthResponseDTO(token, null, principal.getUsername(), roles,
+	    AuthResponseDTO response = new AuthResponseDTO(token, null, principal.getUsername(),principal.getOperator().getName(), principal.getOperator().getId(), roles,
 	            jwtExpirationMs, startShift, activeShift);
 
 	    return ApiResponse.ok(response, "Token is valid.");
@@ -153,7 +186,7 @@ public class AuthApiController {
 			String gateIpAddress = httpRequest.getHeader(CommonConstants.GATE_IP_HEADER);
 			activeShift = operatorShiftService.getActiveShiftByOperator(principal.getOperator().getId(), gateIpAddress);
 		}
-		AuthResponseDTO response = new AuthResponseDTO(newAccessToken, newRefreshToken, principal.getUsername(), roles,
+		AuthResponseDTO response = new AuthResponseDTO(newAccessToken, newRefreshToken, principal.getUsername(),principal.getOperator().getName(), principal.getOperator().getId(), roles,
 				jwtExpirationMs, startShift, activeShift);
 
 		return ApiResponse.ok(response, "Token refreshed.");

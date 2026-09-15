@@ -316,9 +316,9 @@ public class ParkingSessionServiceImpl implements ParkingSessionService {
 	}
 
 	@Override
-	public SearchResultDTO<RecentSessionDTO> searchRecentVisitors(Long gateId, Pageable pageable) throws Exception {
+	public SearchResultDTO<RecentSessionDTO> searchRecentVisitors(Long gateId, Long activeShiftId, Pageable pageable) throws Exception {
 		List<Integer> statuses = List.of(ParkingSessionStatus.ACTIVE.getCode(), ParkingSessionStatus.COMPLETED.getCode());
-		Page<ParkingSession> page = sessionRepository.findRecentVisitorsByGate(statuses, gateId, pageable);
+		Page<ParkingSession> page = sessionRepository.findRecentVisitorsByGate(statuses, gateId, activeShiftId, pageable);
 
 		SearchResultDTO<RecentSessionDTO> result = new SearchResultDTO<>();
 		result.setPageNo(page.getNumber() + 1);

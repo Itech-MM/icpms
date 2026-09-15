@@ -145,6 +145,7 @@
 			</activation>
 			<properties>
 				<war.file.name>icpms-admin</war.file.name>
+				<api.file.name>icpms-api</api.file.name>
 				<website.file.name>icpms</website.file.name>
 				<spring.profiles.active>dev</spring.profiles.active>
 			</properties>
@@ -154,6 +155,7 @@
 			<id>uat</id>
 			<properties>
 				<war.file.name>icpms-admin</war.file.name>
+				<api.file.name>icpms-api</api.file.name>
 				<website.file.name>icpms</website.file.name>
 				<spring.profiles.active>uat</spring.profiles.active>
 			</properties>

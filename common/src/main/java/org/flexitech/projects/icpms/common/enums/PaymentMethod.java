@@ -9,7 +9,7 @@ import lombok.Getter;
 
 @Getter
 public enum PaymentMethod {
-	CASH(1, "Cash"), CARD(2, "Card"), EWALLET(3, "E-Wallet"), ONLINE(4, "Online Banking");
+	CASH(1, "Cash"), CARD(2, "Card"), EWALLET(3, "E-Wallet"), ONLINE(4, "Online Banking"), MEMBER(5, "Member");
 
 	private final Integer code;
 	private final String desc;

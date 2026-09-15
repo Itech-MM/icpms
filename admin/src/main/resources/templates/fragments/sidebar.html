@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav class="sidebar" id="sidebar" th:fragment="sidebar">
+    <div class="sidebar-brand">
+        <i class="bi bi-p-circle-fill"></i> <span>ICPMS Admin</span>
+        <button type="button" class="btn-close btn-close-white ms-auto d-lg-none" id="sidebarClose" aria-label="Close"></button>
+    </div>
+
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activeMenu == 'dashboard'} ? 'active'" th:href="@{/}">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+        </li>
+
+        <li class="nav-heading">Master Setup</li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activeMenu == 'sites'} ? 'active'" th:href="@{/sites}">
+                <i class="bi bi-buildings"></i> Sites
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activeMenu == 'gates'} ? 'active'" th:href="@{/gates}">
+                <i class="bi bi-sign-turn-right"></i> Gates
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activeMenu == 'parking-areas'} ? 'active'" th:href="@{/parking-areas}">
+                <i class="bi bi-grid-1x2"></i> Parking Areas
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activeMenu == 'slots'} ? 'active'" th:href="@{/parking-slots}">
+                <i class="bi bi-grid-3x3-gap"></i> Parking Slots
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activeMenu == 'tariffs'} ? 'active'" th:href="@{/tariffs}">
+                <i class="bi bi-cash-coin"></i> Tariffs
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center"
+               th:classappend="${activeMenu == 'members' or activeMenu == 'member-plans'} ? 'active'"
+               data-bs-toggle="collapse" href="#membersSubmenu" role="button"
+               th:aria-expanded="${activeMenu == 'members' or activeMenu == 'member-plans'}"
+               aria-controls="membersSubmenu">
+                <i class="bi bi-person-badge"></i>
+                <span class="flex-grow-1">Members</span>
+                <i class="bi bi-chevron-down small submenu-caret"></i>
+            </a>
+            <div class="collapse" id="membersSubmenu"
+                 th:classappend="${activeMenu == 'members' or activeMenu == 'member-plans'} ? 'show'">
+                <ul class="nav flex-column sub-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${activeMenu == 'members'} ? 'active'" th:href="@{/members}">
+                            <i class="bi bi-people"></i> All Members
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${activeMenu == 'member-plans'} ? 'active'" th:href="@{/members/plans}">
+                            <i class="bi bi-card-list"></i> Member Plans
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activeMenu == 'vehicles'} ? 'active'" th:href="@{/vehicles}">
+                <i class="bi bi-car-front"></i> Vehicles
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activeMenu == 'operators'} ? 'active'" th:href="@{/operators}">
+                <i class="bi bi-person-workspace"></i> Operators
+            </a>
+        </li>
+
+        <li class="nav-heading">Reports</li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activeMenu == 'report-sessions'} ? 'active'" th:href="@{/reports/parking-sessions}">
+                <i class="bi bi-file-earmark-bar-graph"></i> Parking Sessions
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activeMenu == 'report-payments'} ? 'active'" th:href="@{/reports/payments}">
+                <i class="bi bi-receipt"></i> Payments
+            </a>
+        </li>
+
+        <li class="nav-heading">Administration</li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activeMenu == 'users'} ? 'active'" th:href="@{/users}">
+                <i class="bi bi-people"></i> Users
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activeMenu == 'roles'} ? 'active'" th:href="@{/roles}">
+                <i class="bi bi-shield-lock"></i> Roles
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${activeMenu == 'settings'} ? 'active'" th:href="@{/settings}">
+                <i class="bi bi-sliders"></i> Settings
+            </a>
+        </li>
+    </ul>
+</nav>
+</body>
+</html>

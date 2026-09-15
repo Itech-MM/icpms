@@ -2,7 +2,13 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
-    <property name="LOG_PATH" value="D:/FlexiTech/Company Data/Projects/ICPMS/admin-system/logs"/>
+    <springProfile name="dev">
+        <property name="LOG_PATH" value="D:/FlexiTech/Company Data/Projects/ICPMS/admin-system/logs/api"/>
+    </springProfile>
+    <springProfile name="uat">
+        <property name="LOG_PATH" value="/home/tomcat/icpms/logs/api"/>
+    </springProfile>
+
     <property name="LOG_FILE" value="${LOG_PATH}/icpms-api.log"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -24,25 +30,28 @@
         </encoder>
     </appender>
 
-    <!-- default/root logger -->
-    <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </root>
-
-    <logger name="org.flexitech.projects.icpms" level="DEBUG"/>
-    <logger name="org.springframework.security" level="INFO"/>
-
-    <!-- profile-specific overrides, ready for when you split profiles -->
+    <!-- dev: verbose for our own code only, quiet for framework noise -->
     <springProfile name="dev">
-        <root level="DEBUG">
+        <logger name="org.flexitech.projects.icpms" level="DEBUG"/>
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="org.springframework.security" level="INFO"/>
+        <logger name="org.springframework.web" level="WARN"/>
+        <logger name="org.hibernate" level="WARN"/>
+        <logger name="org.hibernate.SQL" level="WARN"/>
+        <logger name="com.zaxxer.hikari" level="WARN"/>
+        <logger name="com.mysql.cj" level="WARN"/>
+        <logger name="org.apache.tomcat" level="WARN"/>
+        <logger name="org.apache.catalina" level="WARN"/>
+        <root level="WARN">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE"/>
         </root>
     </springProfile>
 
+    <!-- prod: quieter, file only -->
     <springProfile name="prod">
         <logger name="org.flexitech.projects.icpms" level="INFO"/>
+        <logger name="org.springframework.security" level="WARN"/>
         <root level="WARN">
             <appender-ref ref="FILE"/>
         </root>

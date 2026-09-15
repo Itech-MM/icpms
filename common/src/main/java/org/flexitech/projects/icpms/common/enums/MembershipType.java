@@ -9,7 +9,7 @@ import lombok.Getter;
 
 @Getter
 public enum MembershipType {
-	REGULAR(1, "Regular"), VIP(2, "VIP"), CORPORATE(3, "Corporate");
+	REGULAR(1, "Regular"), VIP(2, "VIP");
 
 	private final Integer code;
 	private final String desc;

@@ -1,73 +1,186 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <body>
-<div layout:fragment="content">
+	<div layout:fragment="content">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0" th:text="${memberDTO.id != null} ? 'Edit Member' : 'New Member'"></h4>
-        <a th:href="@{/members}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to List</a>
-    </div>
+		<div class="d-flex justify-content-between align-items-center mb-3">
+			<h4 class="mb-0"
+				th:text="${memberDTO.id != null} ? 'Edit Member' : 'New Member'"></h4>
+			<a th:href="@{/members}" class="btn btn-outline-secondary btn-sm"><i
+				class="bi bi-arrow-left"></i> Back to List</a>
+		</div>
 
-    <div class="card">
-        <div class="card-body">
-            <form th:action="@{/members/save}" th:object="${memberDTO}" method="post" class="row g-3">
-                <input type="hidden" th:field="*{id}">
+		<div class="card">
+			<div class="card-body">
+				<form th:action="@{/members/save}" th:object="${memberDTO}"
+					method="post" class="row g-3">
+					<input type="hidden" th:field="*{id}">
 
-                <div class="col-md-6">
-                    <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                    <input type="text" th:field="*{name}" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Phone Number <span class="text-danger">*</span></label>
-                    <input type="text" th:field="*{phoneNumber}" class="form-control" required>
-                </div>
+					<div class="col-md-6">
+						<label class="form-label">Full Name <span
+							class="text-danger">*</span></label> <input type="text"
+							th:field="*{name}" class="form-control" required>
+					</div>
+					<div class="col-md-6">
+						<label class="form-label">Phone Number <span
+							class="text-danger">*</span></label> <input type="text"
+							th:field="*{phoneNumber}" class="form-control" required>
+					</div>
 
-                <div class="col-md-6">
-                    <label class="form-label">Email</label>
-                    <input type="email" th:field="*{email}" class="form-control">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Membership Type <span class="text-danger">*</span></label>
-                    <select th:field="*{membershipType}" class="form-select" required>
-                        <option value="">-- Select --</option>
-                        <option th:each="m : ${membershipTypes}" th:value="${m.code}" th:text="${m.desc}"></option>
-                    </select>
-                </div>
+					<div class="col-md-6">
+						<label class="form-label">Email</label> <input type="email"
+							th:field="*{email}" class="form-control">
+					</div>
+					<div class="col-md-6">
+						<label class="form-label">Membership Type <span
+							class="text-danger">*</span></label> <select th:field="*{membershipType}"
+							class="form-select" required>
+							<option value="">-- Select --</option>
+							<option th:each="m : ${membershipTypes}" th:value="${m.code}"
+								th:text="${m.desc}"></option>
+						</select>
+					</div>
 
-                <div class="col-md-4">
-                    <label class="form-label">Membership Valid Until</label>
-                    <input type="date" th:field="*{validUntil}" class="form-control">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Reserved VIP Slot</label>
-                    <select th:field="*{reservedSlotId}" class="form-select">
-                        <option value="">-- None --</option>
-                        <option th:each="s : ${slots}" th:value="${s.id}" th:text="${s.siteName} + ' - ' + ${s.slotNumber}"></option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Status</label>
-                    <select th:field="*{status}" class="form-select">
-                        <option th:each="s : ${statuses}" th:value="${s.code}" th:text="${s.desc}"></option>
-                    </select>
-                </div>
+					<div class="col-md-4">
+						<label class="form-label">Membership Valid Until</label> <input
+							type="date" th:field="*{validUntil}" class="form-control">
+					</div>
+					<div class="col-md-4">
+						<label class="form-label">Reserved VIP Slot</label> <select
+							th:field="*{reservedSlotId}" class="form-select">
+							<option value="">-- None --</option>
+							<option th:each="s : ${slots}" th:value="${s.id}"
+								th:text="${s.siteName} + ' - ' + ${s.slotNumber}"></option>
+						</select>
+					</div>
+					<div class="col-md-4">
+						<label class="form-label">Status</label> <select
+							th:field="*{status}" class="form-select">
+							<option th:each="s : ${statuses}" th:value="${s.code}"
+								th:text="${s.desc}"></option>
+						</select>
+					</div>
 
-                <div class="col-md-4">
-                    <div class="form-check mt-2">
-                        <input type="checkbox" th:field="*{isVip}" class="form-check-input" id="isVip">
-                        <label class="form-check-label" for="isVip">VIP Member</label>
-                    </div>
-                </div>
+					<div class="col-md-4">
+						<div class="form-check mt-2">
+							<input type="checkbox" th:field="*{isVip}"
+								class="form-check-input" id="isVip"> <label
+								class="form-check-label" for="isVip">VIP Member</label>
+						</div>
+					</div>
 
-                <div class="col-12 mt-4">
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save</button>
-                    <a th:href="@{/members}" class="btn btn-outline-secondary">Cancel</a>
-                </div>
-            </form>
-        </div>
-    </div>
+					<div class="col-12 mt-4">
+						<button type="submit" class="btn btn-primary">
+							<i class="bi bi-check-lg"></i> Save
+						</button>
+						<a th:href="@{/members}" class="btn btn-outline-secondary">Cancel</a>
+					</div>
+				</form>
+			</div>
+		</div>
 
-</div>
+		<div class="card mt-4" th:if="${memberDTO.id != null}">
+			<div class="card-header">Subscription</div>
+			<div class="card-body">
+
+				<div th:if="${subscription != null}">
+					<div class="row mb-3">
+						<div class="col-md-3">
+							<strong>Plan:</strong> <span
+								th:text="${subscription.planName} + ' (' + ${subscription.planCode} + ')'"></span>
+						</div>
+						<div class="col-md-2">
+							<strong>Status:</strong> <span class="badge"
+								th:classappend="${subscription.status == 1} ? 'bg-success' : 'bg-secondary'"
+								th:text="${subscription.statusDesc}"></span>
+						</div>
+						<div class="col-md-2">
+							<strong>Start:</strong> <span th:text="${subscription.startDate}"></span>
+						</div>
+						<div class="col-md-2">
+							<strong>End:</strong> <span th:text="${subscription.endDate}"></span>
+						</div>
+						<div class="col-md-3">
+							<strong>Balance:</strong> <span th:text="${subscription.balance}"></span>
+						</div>
+					</div>
+
+					<div class="d-flex flex-wrap gap-2 mb-3">
+						<form
+							th:action="@{'/members/' + ${memberDTO.id} + '/subscriptions/' + ${subscription.id} + '/renew'}"
+							method="post">
+							<button type="submit" class="btn btn-sm btn-outline-primary"
+								data-confirm="Renew this subscription?">Renew</button>
+						</form>
+						<form
+							th:action="@{'/members/' + ${memberDTO.id} + '/subscriptions/' + ${subscription.id} + '/cancel'}"
+							method="post">
+							<button type="submit" class="btn btn-sm btn-outline-danger"
+								data-confirm="Cancel this subscription?">Cancel</button>
+						</form>
+						<form
+							th:action="@{'/members/' + ${memberDTO.id} + '/subscriptions/' + ${subscription.id} + '/topup'}"
+							method="post" class="d-flex gap-2 align-items-center">
+							<input type="number" step="0.01" name="amount"
+								class="form-control form-control-sm" style="width: 120px"
+								placeholder="Amount" required> <input type="text"
+								name="remark" class="form-control form-control-sm"
+								style="width: 180px" placeholder="Remark">
+							<button type="submit" class="btn btn-sm btn-outline-success">Top
+								Up</button>
+						</form>
+					</div>
+
+					<h6>Transaction History</h6>
+					<div class="table-responsive">
+						<table class="table table-sm align-middle">
+							<thead>
+								<tr>
+									<th>Type</th>
+									<th>Amount</th>
+									<th>Balance After</th>
+									<th>Remark</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="tx : ${transactions}">
+									<td th:text="${tx.transactionTypeDesc}"></td>
+									<td th:text="${tx.amount}"></td>
+									<td th:text="${tx.balanceAfter}"></td>
+									<td th:text="${tx.remark}"></td>
+								</tr>
+								<tr th:if="${#lists.isEmpty(transactions)}">
+									<td colspan="4" class="text-center text-muted">No
+										transactions yet.</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<div th:if="${subscription == null}">
+					<form th:action="@{'/members/' + ${memberDTO.id} + '/subscribe'}"
+						method="post">
+						<div class="row form-group">
+							<div class='col-md-4'>
+								<label class="form-label small">Plan</label> <select
+									name="planId" class="form-select form-select-sm" required>
+									<option th:each="p : ${activePlans}" th:value="${p.id}"
+										th:text="${p.name} + ' - ' + ${p.code}"></option>
+								</select>
+							</div>
+							<div class="col-md-4 d-flex align-items-end pb-1">
+							
+								<button type="submit" class="btn btn-sm btn-primary">Subscribe</button>
+							</div>
+						</div>
+					</form>
+				</div>
+
+			</div>
+		</div>
+
+	</div>
 </body>
 </html>

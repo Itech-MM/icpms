@@ -29,4 +29,7 @@ public class TableNames {
     
     public static final String SYSTEM_SETTING_TBL = "system_settings";
 
+    public static final String MEMBER_PLAN_TBL = "member_plans";
+    public static final String MEMBER_SUBSCRIPTION_TBL = "member_subscriptions";
+    public static final String MEMBER_BALANCE_TRANSACTION_TBL = "member_balance_transactions";
 }

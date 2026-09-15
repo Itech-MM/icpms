@@ -27,13 +27,25 @@ public abstract class CommonDTO {
 		if(CommonValidators.isValidObject(entity.getUpdatedTime())) {
 			this.updatedTime = DateUtils.dateToString(entity.getUpdatedTime(), CommonConstants.STANDARD_12_HOUR_DATE_MINUTE_FORMAT);
 		}
-		if(CommonValidators.isValidObject(entity.getCreatedBy())) {
-			this.createdBy = entity.getCreatedBy().getId();
-			this.createdByName = entity.getCreatedBy().getName();
+	}
+	
+	public CommonDTO(BasedEntity entity, boolean showAuditUser) {
+		this.id = entity.getId();
+		if(CommonValidators.isValidObject(entity.getCreatedTime())) {
+			this.createdTime = DateUtils.dateToString(entity.getCreatedTime(), CommonConstants.STANDARD_12_HOUR_DATE_MINUTE_FORMAT);
 		}
-		if(CommonValidators.isValidObject(entity.getUpdatedBy())) {
-			this.updatedBy = entity.getUpdatedBy().getId();
-			this.updatedByName = entity.getUpdatedBy().getName();
+		if(CommonValidators.isValidObject(entity.getUpdatedTime())) {
+			this.updatedTime = DateUtils.dateToString(entity.getUpdatedTime(), CommonConstants.STANDARD_12_HOUR_DATE_MINUTE_FORMAT);
+		}
+		if(showAuditUser) {
+			if(CommonValidators.isValidObject(entity.getCreatedBy())) {
+				this.createdBy = entity.getCreatedBy().getId();
+				this.createdByName = entity.getCreatedBy().getName();
+			}
+			if(CommonValidators.isValidObject(entity.getUpdatedBy())) {
+				this.updatedBy = entity.getUpdatedBy().getId();
+				this.updatedByName = entity.getUpdatedBy().getName();
+			}
 		}
 	}
 	

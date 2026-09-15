@@ -2,6 +2,7 @@ package org.flexitech.projects.icpms.dto.api.response;
 
 import java.time.Instant;
 
+import org.flexitech.projects.icpms.common.ApiErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -64,7 +65,7 @@ public class ApiResponse<T> {
 	}
 
 	public static <T> ResponseEntity<ApiResponse<T>> unauthorized(String message) {
-		return error(HttpStatus.UNAUTHORIZED, message);
+		return error(HttpStatus.UNAUTHORIZED, message, ApiErrorCode.UNAUTHORIZED);
 	}
 
 	public static <T> ResponseEntity<ApiResponse<T>> notFound(String message) {

@@ -370,6 +370,30 @@ body {
 .stat-card.variant-purple {
     background: linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);
 }
+
+.sub-nav {
+    padding: .1rem 0 .1rem .5rem;
+}
+
+.sub-nav .nav-link {
+    font-size: .83rem;
+    padding: .5rem .75rem .5rem 1.8rem;
+    opacity: .85;
+}
+
+.sub-nav .nav-link.active {
+    opacity: 1;
+}
+
+.submenu-caret {
+    transition: transform .15s ease;
+    margin-left: auto;
+}
+
+[aria-expanded="true"] .submenu-caret {
+    transform: rotate(180deg);
+}
+
 @media (max-width: 575.98px) {
     .stat-card {
         padding: 1.1rem;

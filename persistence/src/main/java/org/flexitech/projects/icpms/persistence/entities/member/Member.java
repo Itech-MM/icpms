@@ -8,6 +8,7 @@ import org.flexitech.projects.icpms.persistence.entities.slot.ParkingSlot;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -29,7 +30,6 @@ public class Member extends BasedEntity {
 
 	private String email;
 
-	/** MembershipType enum code: 1=Regular, 2=VIP, 3=Corporate */
 	@Column(name = "membership_type")
 	private Integer membershipType;
 
@@ -40,10 +40,13 @@ public class Member extends BasedEntity {
 	@Column(name = "valid_until")
 	private Date validUntil;
 
-	/** Reserved VIP slot (optional) */
 	@ManyToOne
 	@JoinColumn(name = "reserved_slot_id")
 	private ParkingSlot reservedSlot;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "current_subscription_id")
+	private MemberSubscription currentSubscription;
 
 	private Integer status = 1;
 }

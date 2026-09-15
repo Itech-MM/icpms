@@ -6,9 +6,11 @@ import org.flexitech.projects.icpms.common.CommonConstants;
 import org.flexitech.projects.icpms.common.CommonValidators;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
 import org.flexitech.projects.icpms.common.enums.MembershipType;
+import org.flexitech.projects.icpms.common.enums.SubscriptionStatus;
 import org.flexitech.projects.icpms.common.utils.DateUtils;
 import org.flexitech.projects.icpms.dto.CommonDTO;
 import org.flexitech.projects.icpms.persistence.entities.member.Member;
+import org.flexitech.projects.icpms.persistence.entities.member.MemberSubscription;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -37,8 +39,8 @@ public class MemberDTO extends CommonDTO {
 	private String reservedSlotNumber;
 	private Integer status = 1;
 	private String statusDesc;
-	
-	private Boolean isExpired = false;
+
+	private Boolean isExpired = true;
 
 	public MemberDTO(Member member) {
 		super(member);
@@ -50,8 +52,6 @@ public class MemberDTO extends CommonDTO {
 		this.isVip = member.getIsVip();
 		if (CommonValidators.isValidObject(member.getValidUntil())) {
 			this.validUntil = DateUtils.dateToString(member.getValidUntil(), CommonConstants.STANDARD_DB_DATE_FORMAT);
-			Date now = new Date();
-			this.isExpired = member.getValidUntil().before(now);
 		}
 		if (CommonValidators.isValidObject(member.getReservedSlot())) {
 			this.reservedSlotId = member.getReservedSlot().getId();
@@ -59,5 +59,14 @@ public class MemberDTO extends CommonDTO {
 		}
 		this.status = member.getStatus();
 		this.statusDesc = ActiveStatus.getDescByCode(status);
+
+		this.isExpired = true;
+		MemberSubscription subscription = member.getCurrentSubscription();
+		if (CommonValidators.isValidObject(subscription)) {
+			boolean isActiveStatus = SubscriptionStatus.ACTIVE.getCode().equals(subscription.getStatus());
+			boolean notPastEndDate = !CommonValidators.isValidObject(subscription.getEndDate())
+					|| subscription.getEndDate().after(new Date());
+			this.isExpired = !(isActiveStatus && notPastEndDate);
+		}
 	}
 }

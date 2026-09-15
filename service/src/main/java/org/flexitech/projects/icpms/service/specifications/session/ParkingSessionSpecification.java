@@ -26,7 +26,7 @@ public class ParkingSessionSpecification {
 				predicates.add(cb.equal(root.get("entryGate").get("site").get("id"), searchDTO.getSiteId()));
 			}
 
-			if (CommonValidators.isValidObject(searchDTO.getStatus())) {
+			if (CommonValidators.validInteger(searchDTO.getStatus())) {
 				predicates.add(cb.equal(root.get("status"), searchDTO.getStatus()));
 			}
 
@@ -39,7 +39,17 @@ public class ParkingSessionSpecification {
 				predicates.add(cb.lessThanOrEqualTo(root.get("entryTime"), DateUtils.stringToDate(
 						searchDTO.getToDate() + " " + CommonConstants.HOUR_END, CommonConstants.STD_YYYY_MM_DD_24)));
 			}
+			
+			if(CommonValidators.validLong(searchDTO.getGateId())) {
+			    predicates.add(cb.or(cb.equal(root.get("entryGate").get("id"), searchDTO.getGateId()),
+			            cb.equal(root.get("exitGate").get("id"), searchDTO.getGateId())));
+			}
 
+			if(CommonValidators.validLong(searchDTO.getActiveShiftId())) {
+			    predicates.add(cb.or(cb.equal(root.get("entryShift").get("id"), searchDTO.getActiveShiftId()),
+			            cb.equal(root.get("exitShift").get("id"), searchDTO.getActiveShiftId())));
+			}
+			
 			return cb.and(predicates.toArray(new Predicate[0]));
 		};
 	}

@@ -22,11 +22,11 @@ public class VehicleSpecification {
 			if (CommonValidators.validString(searchDTO.getPlateNumber())) {
 				predicates.add(cb.like(cb.lower(root.get("plateNumber")), "%" + searchDTO.getPlateNumber().toLowerCase() + "%"));
 			}
-			if (CommonValidators.isValidObject(searchDTO.getStatus())) {
+			if (CommonValidators.validInteger(searchDTO.getStatus())) {
 				predicates.add(cb.equal(root.get("status"), searchDTO.getStatus()));
 			}
 
-			if (CommonValidators.isValidObject(searchDTO.getFromSession())) {
+			if (CommonValidators.validInteger(searchDTO.getFromSession())) {
 				Subquery<Long> subquery = query.subquery(Long.class);
 				Root<ParkingSession> sessionRoot = subquery.from(ParkingSession.class);
 				subquery.select(sessionRoot.get("id"));
