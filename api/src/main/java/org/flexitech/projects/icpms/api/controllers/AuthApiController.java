@@ -4,11 +4,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.flexitech.projects.icpms.api.security.JwtService;
+import org.flexitech.projects.icpms.api.security.OperatorLoginAuthenticationService;
 import org.flexitech.projects.icpms.api.security.OperatorPrincipal;
 import org.flexitech.projects.icpms.api.security.OperatorUserDetailsService;
 import org.flexitech.projects.icpms.common.CommonConstants;
 import org.flexitech.projects.icpms.common.CommonValidators;
+import org.flexitech.projects.icpms.common.enums.OperatorAuthMethod;
 import org.flexitech.projects.icpms.common.enums.OperatorRole;
 import org.flexitech.projects.icpms.dto.api.request.auth.LoginRequestDTO;
 import org.flexitech.projects.icpms.dto.api.request.auth.LogoutRequestDTO;
@@ -18,7 +21,9 @@ import org.flexitech.projects.icpms.dto.api.response.ApiResponse;
 import org.flexitech.projects.icpms.dto.api.response.auth.AuthResponseDTO;
 import org.flexitech.projects.icpms.dto.api.response.auth.SupervisorValidationResponseDTO;
 import org.flexitech.projects.icpms.dto.operator.OperatorShiftDTO;
+import org.flexitech.projects.icpms.dto.system_setting.SystemSettingDTO;
 import org.flexitech.projects.icpms.service.operator.OperatorShiftService;
+import org.flexitech.projects.icpms.service.setting.SystemSettingService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,42 +43,36 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/auth")
 @Slf4j
+@RequiredArgsConstructor
 public class AuthApiController {
 
 	private final AuthenticationManager authenticationManager;
 	private final JwtService jwtService;
 	private final OperatorUserDetailsService operatorUserDetailsService;
 	private final OperatorShiftService operatorShiftService;
+	private final OperatorLoginAuthenticationService operatorLoginAuthenticationService;
+	private final SystemSettingService systemSettingService;
 
 	@Value("${app.jwt.expiration-ms}")
 	private long jwtExpirationMs;
 
-	public AuthApiController(AuthenticationManager authenticationManager, JwtService jwtService,
-			OperatorUserDetailsService operatorUserDetailsService, OperatorShiftService operatorShiftService) {
-		this.authenticationManager = authenticationManager;
-		this.jwtService = jwtService;
-		this.operatorUserDetailsService = operatorUserDetailsService;
-		this.operatorShiftService = operatorShiftService;
-	}
-
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse<AuthResponseDTO>> login(@Valid @RequestBody LoginRequestDTO request,
 			HttpServletRequest httpRequest) {
-		Authentication authentication;
+		OperatorPrincipal principal;
+
 		try {
-			authentication = authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+		    principal = operatorLoginAuthenticationService.authenticate(request);
 		} catch (BadCredentialsException e) {
-			return ApiResponse.internalError("Invalid username or password.");
+		    return ApiResponse.internalError("Invalid credentials.");
 		}
-
-		OperatorPrincipal principal = (OperatorPrincipal) authentication.getPrincipal();
-
+		
 		List<String> roles = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 
 		String sessionToken = UUID.randomUUID().toString();
@@ -94,6 +93,24 @@ public class AuthApiController {
 				jwtExpirationMs, startShift, activeShift);
 
 		return ApiResponse.ok(response, "Login successful.");
+	}
+	
+	@GetMapping("/methods")
+	public ResponseEntity<ApiResponse<List<SystemSettingDTO>>> getAuthMethods(){
+		try {
+			
+			return ApiResponse.ok(systemSettingService.getSettingByCodeList(List.of(
+					OperatorAuthMethod.PASSWORD.getSettingCode(),
+					OperatorAuthMethod.RFID.getSettingCode(),
+					OperatorAuthMethod.QR_CODE.getSettingCode(),
+					OperatorAuthMethod.PIN.getSettingCode(),
+					OperatorAuthMethod.MAG_STRIPE.getSettingCode()
+					)));
+			
+		}catch (Exception e) {
+			log.error("Error getting auth methods:: {}", ExceptionUtils.getStackTrace(e));
+			return ApiResponse.internalError(e.getMessage());
+		}
 	}
 
 	@PostMapping("/validate-supervisor")

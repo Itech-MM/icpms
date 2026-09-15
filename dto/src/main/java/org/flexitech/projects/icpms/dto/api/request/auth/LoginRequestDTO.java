@@ -1,6 +1,6 @@
 package org.flexitech.projects.icpms.dto.api.request.auth;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,9 +8,12 @@ import lombok.Setter;
 @Setter
 public class LoginRequestDTO {
 
-	@NotBlank(message = "Username is required")
-	private String username;
+    @NotNull(message = "Authentication methods should not be null.")
+    private Integer authMethod;
 
-	@NotBlank(message = "Password is required")
-	private String password;
+    private String username;
+
+    private String password;
+
+    private String credential;
 }

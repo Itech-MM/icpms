@@ -18,4 +18,6 @@ public interface SystemSettingService {
 	
 	List<SystemSettingDTO> getAllOperatorSettings();
 	
+	List<SystemSettingDTO> getSettingByCodeList(List<String> codes);
+	
 }

@@ -12,4 +12,7 @@ public interface SystemSettingRepository extends JpaRepository<SystemSetting, Lo
 	
 	List<SystemSetting> findBySyncToOperatorStatus(Integer syncToOperatorStatus);
 
+	List<SystemSetting> findByCodeIn(List<String> codes);
+	
+	List<SystemSetting> findByCodeInAndValue(List<String> codes, String value);
 }

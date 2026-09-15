@@ -196,4 +196,17 @@ public class SystemSettingServiceImpl implements SystemSettingService {
 				.stream().map(SystemSettingDTO::new).collect(Collectors.toList());
 	}
 
+	@Override
+	public List<SystemSettingDTO> getSettingByCodeList(List<String> codes) {
+		if (!CommonValidators.validList(codes)) {
+			return Collections.emptyList();
+		}
+
+		return this.systemSettingRepository
+				.findByCodeInAndValue(codes, "1")
+				.stream()
+				.map(SystemSettingDTO::new)
+				.collect(Collectors.toList());
+	}
+
 }
