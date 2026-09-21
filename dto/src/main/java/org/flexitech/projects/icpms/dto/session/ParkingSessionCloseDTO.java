@@ -18,4 +18,5 @@ public class ParkingSessionCloseDTO {
     private Long tariffId;
     private Long durationMinutes;
     private String remark;
+    private String exitPlatePhotoUrl;
 }

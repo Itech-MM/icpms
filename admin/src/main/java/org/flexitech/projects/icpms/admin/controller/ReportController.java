@@ -37,7 +37,7 @@ public class ReportController {
 	@GetMapping("/reports/parking-sessions")
 	public String sessionsReport(ParkingSessionSearchDTO searchDTO,
 			@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "20") int size,
+			@RequestParam(defaultValue = "10") int size,
 			Model model) throws Exception {
 
 		Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
@@ -64,7 +64,7 @@ public class ReportController {
 	@GetMapping("/reports/payments")
 	public String paymentsReport(PaymentSearchDTO searchDTO,
 			@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "20") int size,
+			@RequestParam(defaultValue = "10") int size,
 			Model model) throws Exception {
 
 		Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());

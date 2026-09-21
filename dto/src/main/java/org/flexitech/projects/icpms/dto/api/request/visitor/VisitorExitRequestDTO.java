@@ -20,4 +20,8 @@ public class VisitorExitRequestDTO {
     private Boolean isMember;
 
     private Boolean isFoc;
+    
+	private String photoUrl;
+	
+	private String platePhotoUrl;
 }

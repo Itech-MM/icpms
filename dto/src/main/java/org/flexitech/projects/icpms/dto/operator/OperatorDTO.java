@@ -6,6 +6,8 @@ import org.flexitech.projects.icpms.common.enums.OperatorRole;
 import org.flexitech.projects.icpms.dto.CommonDTO;
 import org.flexitech.projects.icpms.persistence.entities.operator.Operator;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -23,6 +25,7 @@ public class OperatorDTO extends CommonDTO {
 	private String name;
 	@NotBlank
 	private String username;
+	@JsonIgnore
 	private String password;
 	private String phoneNumber;
 	private Long siteId;
@@ -32,6 +35,17 @@ public class OperatorDTO extends CommonDTO {
 	private String roleDesc;
 	private Integer status = 1;
 	private String statusDesc;
+	
+	@JsonIgnore
+	private String pinPassword;
+	
+	private String rfidToken;
+	
+	private String qrCodeToken;
+	
+	private String qrImagePath;
+	
+	private String stripeToken;
 
 	public OperatorDTO(Operator operator) {
 		super(operator);
@@ -46,5 +60,11 @@ public class OperatorDTO extends CommonDTO {
 		this.roleDesc = OperatorRole.getDescByCode(role);
 		this.status = operator.getStatus();
 		this.statusDesc = ActiveStatus.getDescByCode(status);
+		
+		this.pinPassword = operator.getPinPassword();
+		this.rfidToken = operator.getRfidToken();
+		this.qrCodeToken = operator.getQrCodeToken();
+		this.qrImagePath = operator.getQrImagePath();
+		this.stripeToken = operator.getStripeToken();
 	}
 }

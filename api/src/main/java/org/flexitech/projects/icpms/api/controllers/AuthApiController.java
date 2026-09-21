@@ -16,7 +16,6 @@ import org.flexitech.projects.icpms.common.enums.OperatorRole;
 import org.flexitech.projects.icpms.dto.api.request.auth.LoginRequestDTO;
 import org.flexitech.projects.icpms.dto.api.request.auth.LogoutRequestDTO;
 import org.flexitech.projects.icpms.dto.api.request.auth.RefreshTokenRequestDTO;
-import org.flexitech.projects.icpms.dto.api.request.auth.SupervisorValidationRequestDTO;
 import org.flexitech.projects.icpms.dto.api.response.ApiResponse;
 import org.flexitech.projects.icpms.dto.api.response.auth.AuthResponseDTO;
 import org.flexitech.projects.icpms.dto.api.response.auth.SupervisorValidationResponseDTO;
@@ -27,10 +26,10 @@ import org.flexitech.projects.icpms.service.setting.SystemSettingService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -52,7 +51,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AuthApiController {
 
-	private final AuthenticationManager authenticationManager;
 	private final JwtService jwtService;
 	private final OperatorUserDetailsService operatorUserDetailsService;
 	private final OperatorShiftService operatorShiftService;
@@ -115,21 +113,20 @@ public class AuthApiController {
 
 	@PostMapping("/validate-supervisor")
 	public ResponseEntity<ApiResponse<SupervisorValidationResponseDTO>> validateSupervisor(
-			@Valid @RequestBody SupervisorValidationRequestDTO request, Authentication authentication) {
+			@Valid @RequestBody LoginRequestDTO request, Authentication authentication) {
 
 		if (authentication == null || !(authentication.getPrincipal() instanceof OperatorPrincipal)) {
 			return ApiResponse.error(HttpStatus.UNAUTHORIZED, "Operator context is required.");
 		}
 
-		Authentication supervisorAuthentication;
+		OperatorPrincipal supervisorPrincipal;
 		try {
-			supervisorAuthentication = authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-		} catch (BadCredentialsException e) {
-			return ApiResponse.internalError("Invalid supervisor username or password.");
+			supervisorPrincipal = operatorLoginAuthenticationService.authenticate(request);
+		} catch (DisabledException e) {
+			return ApiResponse.error(HttpStatus.FORBIDDEN, "Supervisor account is inactive.");
+		} catch (AuthenticationException e) {
+			return ApiResponse.internalError("Invalid supervisor credentials.");
 		}
-
-		OperatorPrincipal supervisorPrincipal = (OperatorPrincipal) supervisorAuthentication.getPrincipal();
 
 		if (!OperatorRole.SUPERVISOR.getCode().equals(supervisorPrincipal.getOperator().getRole())) {
 			return ApiResponse.error(HttpStatus.FORBIDDEN, "The provided credentials do not belong to a supervisor.");

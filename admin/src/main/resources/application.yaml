@@ -24,6 +24,7 @@ server:
     context-path: /icpms-admin
 
 app:
+  version: 1.0.0
   jwt:
     expiration-ms: 3600000
     refresh-expiration-ms: 604800000

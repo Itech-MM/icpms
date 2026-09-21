@@ -42,6 +42,8 @@ public class ParkingSessionDTO extends CommonDTO {
 	private String siteName;
 	private Long parkingAreaId;
 	private String parkingAreaName;
+	private String entryPlatePhotoUrl;
+	private String exitPlatePhotoUrl;
 
 	public ParkingSessionDTO(ParkingSession session) {
 		super(session);
@@ -84,6 +86,8 @@ public class ParkingSessionDTO extends CommonDTO {
 		}
 		this.entryPhotoUrl = session.getEntryPhotoUrl();
 		this.exitPhotoUrl = session.getExitPhotoUrl();
+		this.entryPlatePhotoUrl = session.getEntryPlatePhotoUrl();
+		this.exitPlatePhotoUrl = session.getExitPlatePhotoUrl();
 		this.totalAmount = session.getTotalAmount();
 		this.status = session.getStatus();
 		this.statusDesc = ParkingSessionStatus.getDescByCode(status);

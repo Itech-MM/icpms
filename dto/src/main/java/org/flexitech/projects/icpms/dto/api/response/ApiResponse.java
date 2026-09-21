@@ -83,4 +83,12 @@ public class ApiResponse<T> {
 	public static <T> ResponseEntity<ApiResponse<T>> internalError(String message) {
 		return error(HttpStatus.INTERNAL_SERVER_ERROR, message);
 	}
+
+	public static ResponseEntity<ApiResponse<Object>> badRequest(String message, Object data) {
+		ApiResponse<Object> body = new ApiResponse<>();
+		body.setSuccess(false);
+		body.setMessage(message);
+		body.setData(data);
+		return ResponseEntity.badRequest().body(body);
+	}
 }

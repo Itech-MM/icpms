@@ -4,6 +4,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class DateUtils {
@@ -27,6 +30,27 @@ public class DateUtils {
 		SimpleDateFormat sdf = new SimpleDateFormat(standardDateInputFormat);
 		String retDate = sdf.format(dateTime);
 		return retDate;
+	}
+
+	public static LocalDateTime stringToLocalDateTime(String dateTime, String standardDateInputFormat) {
+		if (dateTime == null || dateTime.trim().isEmpty()) {
+			return null;
+		}
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(standardDateInputFormat);
+			return LocalDateTime.parse(dateTime, formatter);
+		} catch (Exception e) {
+			System.out.println("Error : " + e.getMessage());
+			return null;
+		}
+	}
+
+	public static String localDateTimeToString(LocalDateTime dateTime, String standardDateInputFormat) {
+		if (dateTime == null) {
+			return "";
+		}
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(standardDateInputFormat);
+		return dateTime.format(formatter);
 	}
 
 	public static String getRelativeTime(Date date, String format) {
@@ -57,6 +81,14 @@ public class DateUtils {
 		} else {
 			return dateToString(date, format);
 		}
+	}
+
+	public static String getRelativeTime(LocalDateTime dateTime, String format) {
+		if (dateTime == null) {
+			return "";
+		}
+		Date date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
+		return getRelativeTime(date, format);
 	}
 
 }

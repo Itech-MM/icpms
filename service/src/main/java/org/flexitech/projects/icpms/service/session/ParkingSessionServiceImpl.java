@@ -172,6 +172,7 @@ public class ParkingSessionServiceImpl implements ParkingSessionService {
 		session.setStatus(ParkingSessionStatus.ACTIVE.getCode());
 		session.setEntryShift(operatorShift);
 		session.setParkingArea(parkingArea);
+		session.setEntryPlatePhotoUrl(createDTO.getEntryPlatePhotoUrl());
 
 		if (createDTO.getOperatorId() != null) {
 			Operator operator = this.operatorRepository.findById(createDTO.getOperatorId())
@@ -232,6 +233,7 @@ public class ParkingSessionServiceImpl implements ParkingSessionService {
 		session.setTariff(tariff);
 		session.setDurationMinutes(CommonUtils.getDefaultValue(closeDTO.getDurationMinutes(), 0L));
 		session.setRemark(closeDTO.getRemark());
+		session.setExitPlatePhotoUrl(closeDTO.getExitPlatePhotoUrl());
 		
 		boolean isVip = false;
 		

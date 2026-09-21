@@ -46,10 +46,12 @@ import org.flexitech.projects.icpms.service.tariff.TariffService;
 import org.flexitech.projects.icpms.service.vehicle.VehicleService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -125,7 +127,9 @@ public class VisitorApiController {
 			createDTO.setEntryShiftId(activeShift.getId());
 			createDTO.setParkingSlotId(request.getParkingSlotId());
 			createDTO.setParkingAreaId(parkingArea.getId());
-
+			createDTO.setEntryPhotoUrl(request.getPhotoUrl());
+			createDTO.setEntryPlatePhotoUrl(request.getPlatePhotoUrl());
+			
 			ParkingSessionDTO session = parkingSessionService.createEntry(createDTO);
 
 			return ApiResponse.ok(session, "Entry saved.");
@@ -284,6 +288,8 @@ public class VisitorApiController {
 			closeDTO.setTariffId(tariffId);
 			closeDTO.setDurationMinutes(durationMinutes);
 			closeDTO.setRemark(request.getRemark());
+			closeDTO.setExitPhotoUrl(request.getPhotoUrl());
+			closeDTO.setExitPlatePhotoUrl(request.getPlatePhotoUrl());
 
 			ParkingSessionDTO closedSession = parkingSessionService.closeSession(closeDTO);
 			PaymentDTO payment = paymentService.recordPayment(activeSession.getId(), amountDue, paymentMethod,
@@ -394,7 +400,7 @@ public class VisitorApiController {
 			searchDTO.setGateId(gate.getId());
 			searchDTO.setActiveShiftId(activeShitf.getId());
 
-			Pageable page = PageRequest.of(CommonUtils.getDefaultValue(searchDTO.getPageNo(), 1) - 1, CommonConstants.ROW_PER_PAGE);
+			Pageable page = PageRequest.of(CommonUtils.getDefaultValue(searchDTO.getPageNo(), 1) - 1, CommonConstants.ROW_PER_PAGE, Sort.by("createdTime").descending());
 
 			SearchResultDTO<ParkingSessionDTO> result = this.parkingSessionService.searchSessions(searchDTO, page);
 
@@ -404,7 +410,21 @@ public class VisitorApiController {
 			return ApiResponse.internalError(e.getMessage());
 		}
 	}
-
+	
+	@GetMapping("/{id}")
+	public ResponseEntity<ApiResponse<ParkingSessionDTO>> getParkingSessionDetail(@PathVariable Long id){
+		try {
+			
+			return ApiResponse.ok(this.parkingSessionService.getSessionById(id), "Getting parking session detail success.");
+			
+		}catch (Exception e) {
+			log.error("Error on getting parking session:: {}", ExceptionUtils.getStackTrace(e));
+			return ApiResponse.internalError(e.getMessage());
+		}
+	}
+	
+	
+	
 	private OperatorPrincipal currentOperator(Authentication authentication) {
 		if (authentication != null && authentication.getPrincipal() instanceof OperatorPrincipal principal) {
 			return principal;

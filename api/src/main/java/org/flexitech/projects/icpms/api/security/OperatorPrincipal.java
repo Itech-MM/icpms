@@ -25,7 +25,6 @@ public class OperatorPrincipal implements UserDetails {
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> authorities = new java.util.ArrayList<>();
-		authorities.add(new SimpleGrantedAuthority("ROLE_OPERATOR"));
 
 		for (OperatorRole role : OperatorRole.values()) {
 			if (role.getCode().equals(operator.getRole())) {

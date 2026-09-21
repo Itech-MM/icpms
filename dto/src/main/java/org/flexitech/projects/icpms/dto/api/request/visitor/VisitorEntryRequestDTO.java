@@ -14,4 +14,8 @@ public class VisitorEntryRequestDTO {
 	private String vehicleType;
 
 	private Long parkingSlotId;	
+	
+	private String photoUrl;
+	
+	private String platePhotoUrl;
 }

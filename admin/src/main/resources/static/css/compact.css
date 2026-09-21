@@ -1,0 +1,310 @@
+html {
+    font-size: 14px;
+}
+
+:root,
+[data-bs-theme="light"] {
+    --sidebar-width: 220px;
+}
+
+/* 2. Headings -------------------------------------------------------- */
+h1, .h1 { font-size: 1.9rem; }
+h2, .h2 { font-size: 1.6rem; }
+h3, .h3 { font-size: 1.4rem; }
+h4, .h4 { font-size: 1.2rem; }
+h5, .h5 { font-size: 1.05rem; }
+h6, .h6 { font-size: .95rem; }
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    margin-bottom: .4rem;
+    line-height: 1.15;
+}
+
+hr {
+    margin: .75rem 0;
+}
+
+/* 3. Sidebar --------------------------------------------------------- */
+.sidebar-brand {
+    padding: .8rem 1rem 1.1rem;
+    font-size: 1.35rem;
+    gap: .45rem;
+}
+
+.sidebar-brand::after {
+    height: 6px;
+}
+
+.sidebar .nav {
+    padding: .35rem .5rem;
+}
+
+.sidebar .nav-heading {
+    padding: .7rem 1rem .2rem;
+    font-size: .72rem;
+}
+
+.sidebar .nav-link {
+    padding: .38rem .6rem;
+    font-size: .86rem;
+    gap: .5rem;
+    border-left-width: 3px;
+}
+
+.sidebar .nav-link i {
+    font-size: .95rem;
+}
+
+.sub-nav {
+    margin: 0 0 0 1.1rem;
+}
+
+.sub-nav .nav-link {
+    padding: .3rem .6rem;
+    font-size: .82rem;
+}
+
+.sidebar-footer {
+    padding: .5rem 1rem;
+    font-size: .75rem;
+    gap: .5rem;
+}
+
+/* 4. Top bar & page area -------------------------------------------- */
+.top-navbar {
+    padding: .35rem 0;
+    border-bottom-width: 2px;
+}
+
+.navbar-text {
+    font-size: 1.2rem;
+}
+
+.user-avatar {
+    width: 30px;
+    height: 30px;
+    font-size: .75rem;
+}
+
+.content-area {
+    padding: .75rem;
+}
+
+@media (min-width: 992px) {
+    .content-area {
+        padding: 1rem 1.25rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .content-area {
+        padding: .6rem;
+    }
+}
+
+/* 5. Cards & stat cards ---------------------------------------------- */
+.card-header {
+    padding: .5rem .85rem;
+    font-size: 1rem;
+}
+
+.card-body {
+    padding: .85rem;
+}
+
+.card-footer {
+    padding: .5rem .85rem;
+}
+
+.stat-card {
+    padding: .9rem 1rem;
+    border-left-width: 8px;
+}
+
+.stat-card .stat-value {
+    font-size: 1.9rem;
+}
+
+.stat-card .stat-label {
+    font-size: .8rem;
+}
+
+.stat-card .stat-icon {
+    font-size: 1.7rem;
+}
+
+@media (max-width: 575.98px) {
+    .stat-card {
+        padding: .75rem .85rem;
+    }
+    .stat-card .stat-value {
+        font-size: 1.6rem;
+    }
+    .stat-card .stat-icon {
+        font-size: 1.4rem;
+    }
+}
+
+/* 6. Buttons --------------------------------------------------------- */
+.btn {
+    padding: .32rem .75rem;
+    font-size: .875rem;
+}
+
+.btn-sm {
+    padding: .18rem .5rem;
+    font-size: .78rem;
+}
+
+.btn-lg {
+    padding: .5rem 1rem;
+    font-size: 1rem;
+}
+
+/* 7. Forms ----------------------------------------------------------- */
+.form-control,
+.form-select {
+    padding: .32rem .6rem;
+    font-size: .875rem;
+}
+
+.form-select {
+    padding-right: 2rem;
+}
+
+.form-control-sm,
+.form-select-sm {
+    padding: .18rem .45rem;
+    font-size: .8rem;
+}
+
+.form-label {
+    font-size: .8rem;
+    margin-bottom: .2rem;
+}
+
+.form-text {
+    font-size: .75rem;
+    margin-top: .15rem;
+}
+
+.invalid-feedback,
+.valid-feedback {
+    font-size: .75rem;
+    margin-top: .15rem;
+}
+
+.form-check {
+    min-height: 1.2rem;
+    margin-bottom: .15rem;
+}
+
+.form-check-input {
+    width: 1.05em;
+    height: 1.05em;
+}
+
+.form-switch .form-check-input {
+    width: 2.2em;
+}
+
+.input-group-text {
+    padding: .32rem .6rem;
+    font-size: .875rem;
+}
+
+/* 8. Tables ---------------------------------------------------------- */
+.table {
+    font-size: .85rem;
+}
+
+.table thead th {
+    padding: .45rem .7rem;
+    font-size: .78rem;
+    border-bottom-width: 2px;
+    white-space: nowrap;
+}
+
+.table tbody td {
+    padding: .35rem .7rem;
+}
+
+/* 9. Badges, alerts, tabs, pills ------------------------------------- */
+.badge {
+    padding: .28em .5em;
+    font-size: .72rem;
+}
+
+.alert {
+    padding: .5rem .85rem;
+    margin-bottom: .75rem;
+    border-left-width: 6px;
+    font-size: .875rem;
+}
+
+.nav-tabs .nav-link {
+    padding: .38rem .85rem;
+    font-size: .875rem;
+}
+
+.nav-pills .nav-link {
+    padding: .32rem .75rem;
+    font-size: .875rem;
+}
+
+.breadcrumb {
+    margin-bottom: .5rem;
+    font-size: .8rem;
+}
+
+/* 10. Modals, dropdowns, pagination, lists --------------------------- */
+.modal-header {
+    padding: .55rem 1rem;
+    border-bottom-width: 3px;
+}
+
+.modal-title {
+    font-size: 1.1rem;
+}
+
+.modal-body {
+    padding: .9rem 1rem;
+}
+
+.modal-footer {
+    padding: .5rem 1rem;
+    gap: .35rem;
+}
+
+.dropdown-item {
+    padding: .3rem .85rem;
+    font-size: .85rem;
+}
+
+.dropdown-menu {
+    padding: .25rem 0;
+    box-shadow: 3px 3px 0 var(--ink);
+}
+
+.page-link {
+    padding: .25rem .6rem;
+    font-size: .82rem;
+}
+
+.list-group-item {
+    padding: .45rem .85rem;
+    font-size: .875rem;
+}
+
+.progress {
+    --bs-progress-height: .7rem;
+}
+
+.toast-body {
+    padding: .5rem .75rem;
+}
+
+.login-card::before {
+    height: 6px;
+}

@@ -59,6 +59,9 @@ public class ParkingSession extends BasedEntity {
 
 	@Column(name = "entry_photo_url")
 	private String entryPhotoUrl;
+	
+	@Column(name = "entry_plate_photo_url")
+	private String entryPlatePhotoUrl;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "exit_time")
@@ -67,6 +70,9 @@ public class ParkingSession extends BasedEntity {
 	@Column(name = "exit_photo_url")
 	private String exitPhotoUrl;
 
+	@Column(name = "exit_plate_photo_url")
+	private String exitPlatePhotoUrl;
+	
 	@Column(name = "total_amount")
 	private BigDecimal totalAmount;
 

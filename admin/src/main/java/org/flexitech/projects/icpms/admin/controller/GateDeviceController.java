@@ -2,6 +2,7 @@ package org.flexitech.projects.icpms.admin.controller;
 
 import org.flexitech.projects.icpms.common.CommonConstants;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
+import org.flexitech.projects.icpms.common.enums.DeviceConnectionType;
 import org.flexitech.projects.icpms.common.enums.GateDeviceType;
 import org.flexitech.projects.icpms.common.enums.GateType;
 import org.flexitech.projects.icpms.dto.gate.GateDeviceDTO;
@@ -44,10 +45,12 @@ public class GateDeviceController {
 			formDTO = new GateDeviceDTO();
 			formDTO.setGateId(gateId);
 			formDTO.setStatus(ActiveStatus.ACTIVE.getCode());
+			formDTO.setConnectionType(DeviceConnectionType.LAN.getCode());
 		}
 		model.addAttribute("deviceDTO", formDTO);
 
 		model.addAttribute("deviceTypes", GateDeviceType.getAll());
+		model.addAttribute("connectionTypes", DeviceConnectionType.getAll());
 		model.addAttribute("directions", GateType.getAll());
 		model.addAttribute("statuses", ActiveStatus.getAll());
 		model.addAttribute("pageTitle", "Gate Devices");

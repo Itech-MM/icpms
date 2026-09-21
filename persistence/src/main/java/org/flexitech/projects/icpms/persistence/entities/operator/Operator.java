@@ -29,8 +29,22 @@ public class Operator extends BasedEntity {
 	@JoinColumn(name = "site_id")
 	private Site site;
 
-	/** OperatorRole enum code: 1=Gate Operator, 2=Supervisor, 3=Cashier */
 	private Integer role;
 
 	private Integer status = 1;
+	
+	@Column(name = "pin_password", unique = true)
+	private String pinPassword;
+	
+	@Column(name = "rfid_token", unique = true)
+	private String rfidToken;
+	
+	@Column(name = "qr_code_token", unique = true)
+	private String qrCodeToken;
+	
+	@Column(name = "qr_image_path", unique = true)
+	private String qrImagePath;
+	
+	@Column(name = "stripe_token", unique = true)
+	private String stripeToken;
 }
