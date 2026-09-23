@@ -3,6 +3,7 @@ package org.flexitech.projects.icpms.admin.controller;
 import java.util.Collections;
 import java.util.List;
 
+import org.flexitech.projects.icpms.common.MenuCodeConstants;
 import org.flexitech.projects.icpms.common.enums.InputType;
 import org.flexitech.projects.icpms.common.exceptions.SystemSettingNotFoundException;
 import org.flexitech.projects.icpms.dto.system_setting.SystemSettingDTO;
@@ -10,6 +11,7 @@ import org.flexitech.projects.icpms.dto.system_setting.SystemSettingManageDTO;
 import org.flexitech.projects.icpms.dto.system_setting.SystemSettingSearchDTO;
 import org.flexitech.projects.icpms.service.setting.SystemSettingService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +32,8 @@ public class SystemSettingController {
 	private final SystemSettingService systemSettingService;
 
 	@GetMapping
+	@PreAuthorize("@menuSecurity.hasMenuAccess('" + MenuCodeConstants.MENU_SETTINGS
+			+ "') or @menuSecurity.hasMenuView('" + MenuCodeConstants.MENU_SETTINGS + "')")
 	public String settingPage(Model model) {
 
 		SystemSettingManageDTO dto = new SystemSettingManageDTO();
@@ -39,10 +43,12 @@ public class SystemSettingController {
 		dto.setSettings(systemSettingService.searchSystemSetting(search).getResults());
 		model.addAttribute("inputTypeList", InputType.getAll());
 		model.addAttribute("dto", dto);
+		model.addAttribute("activeMenu", "settings");
 		return "setting/manage";
 	}
 
 	@PostMapping("/batch-update")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_SETTINGS + "')")
 	@ResponseBody
 	public ResponseEntity<?> batchUpdateSettings(@RequestBody List<SystemSettingDTO> settings) {
 	    try {

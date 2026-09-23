@@ -1,6 +1,7 @@
 package org.flexitech.projects.icpms.admin.controller;
 
 import org.flexitech.projects.icpms.common.CommonConstants;
+import org.flexitech.projects.icpms.common.MenuCodeConstants;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
 import org.flexitech.projects.icpms.common.enums.DeviceConnectionType;
 import org.flexitech.projects.icpms.common.enums.GateDeviceType;
@@ -8,6 +9,7 @@ import org.flexitech.projects.icpms.common.enums.GateType;
 import org.flexitech.projects.icpms.dto.gate.GateDeviceDTO;
 import org.flexitech.projects.icpms.service.gate.GateDeviceService;
 import org.flexitech.projects.icpms.service.gate.GateService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +33,8 @@ public class GateDeviceController {
 	}
 
 	@GetMapping
+	@PreAuthorize("@menuSecurity.hasMenuAccess('" + MenuCodeConstants.MENU_GATES
+			+ "') or @menuSecurity.hasMenuView('" + MenuCodeConstants.MENU_GATES + "')")
 	public String list(@PathVariable Long gateId,
 			@RequestParam(required = false) Long editId,
 			Model model) throws Exception {
@@ -59,6 +63,7 @@ public class GateDeviceController {
 	}
 
 	@PostMapping("/save")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_GATES + "')")
 	public String save(@PathVariable Long gateId, @ModelAttribute GateDeviceDTO deviceDTO,
 			RedirectAttributes redirectAttributes) {
 		try {
@@ -72,6 +77,7 @@ public class GateDeviceController {
 	}
 
 	@PostMapping("/{deviceId}/delete")
+	@PreAuthorize("@menuSecurity.hasMenuDelete('" + MenuCodeConstants.MENU_GATES + "')")
 	public String delete(@PathVariable Long gateId, @PathVariable Long deviceId, RedirectAttributes redirectAttributes) {
 		try {
 			gateDeviceService.deleteDevice(deviceId);

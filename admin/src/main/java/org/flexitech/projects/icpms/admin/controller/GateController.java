@@ -1,6 +1,7 @@
 package org.flexitech.projects.icpms.admin.controller;
 
 import org.flexitech.projects.icpms.common.CommonConstants;
+import org.flexitech.projects.icpms.common.MenuCodeConstants;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
 import org.flexitech.projects.icpms.common.enums.GateType;
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
@@ -12,6 +13,7 @@ import org.flexitech.projects.icpms.service.site.SiteService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,11 +34,11 @@ public class GateController {
 
 	private final GateService gateService;
 	private final SiteService siteService;
-	
 	private final ParkingAreaService parkingAreaService;
-	
-	
+
 	@GetMapping
+	@PreAuthorize("@menuSecurity.hasMenuAccess('" + MenuCodeConstants.MENU_GATES
+			+ "') or @menuSecurity.hasMenuView('" + MenuCodeConstants.MENU_GATES + "')")
 	public String list(GateSearchDTO searchDTO,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size,
@@ -63,6 +65,7 @@ public class GateController {
 	}
 
 	@GetMapping("/new")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_GATES + "')")
 	public String createForm(Model model) {
 		model.addAttribute("gateDTO", new GateDTO());
 		loadFormRefData(model);
@@ -71,6 +74,7 @@ public class GateController {
 	}
 
 	@GetMapping("/{id}/edit")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_GATES + "')")
 	public String editForm(@PathVariable Long id, Model model) throws Exception {
 		model.addAttribute("gateDTO", gateService.getGateById(id));
 		loadFormRefData(model);
@@ -84,10 +88,10 @@ public class GateController {
 		model.addAttribute("sites", siteService.findAllActiveSites());
 		model.addAttribute("areas", parkingAreaService.findAllActiveParkingAreas());
 		model.addAttribute("activeMenu", "gates");
-
 	}
 
 	@PostMapping("/save")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_GATES + "')")
 	public String save(@Valid @ModelAttribute("gateDTO") GateDTO gateDTO, org.springframework.validation.BindingResult bindingResult,
 			Model model, RedirectAttributes redirectAttributes) {
 		if (bindingResult.hasErrors()) {
@@ -105,6 +109,7 @@ public class GateController {
 	}
 
 	@PostMapping("/{id}/delete")
+	@PreAuthorize("@menuSecurity.hasMenuDelete('" + MenuCodeConstants.MENU_GATES + "')")
 	public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
 		try {
 			gateService.deleteGate(id);

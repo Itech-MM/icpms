@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 import org.flexitech.projects.icpms.common.CommonConstants;
+import org.flexitech.projects.icpms.common.MenuCodeConstants;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
 import org.flexitech.projects.icpms.common.enums.MembershipType;
 import org.flexitech.projects.icpms.common.exceptions.NoActiveSubscriptionException;
@@ -23,6 +24,7 @@ import org.flexitech.projects.icpms.service.slot.ParkingSlotService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -51,6 +53,8 @@ public class MemberController {
 	}
 
 	@GetMapping
+	@PreAuthorize("@menuSecurity.hasMenuAccess('" + MenuCodeConstants.MENU_MEMBERS
+			+ "') or @menuSecurity.hasMenuView('" + MenuCodeConstants.MENU_MEMBERS + "')")
 	public String list(MemberSearchDTO searchDTO,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size,
@@ -75,6 +79,7 @@ public class MemberController {
 	}
 
 	@GetMapping("/new")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_MEMBERS + "')")
 	public String createForm(Model model) {
 		model.addAttribute("memberDTO", new MemberDTO());
 		loadFormRefData(model, null);
@@ -86,6 +91,7 @@ public class MemberController {
 	}
 
 	@GetMapping("/{id}/edit")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_MEMBERS + "')")
 	public String editForm(@PathVariable Long id, Model model) throws Exception {
 		MemberDTO dto = memberService.getMemberById(id);
 		model.addAttribute("memberDTO", dto);
@@ -127,6 +133,7 @@ public class MemberController {
 	}
 
 	@PostMapping("/save")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_MEMBERS + "')")
 	public String save(@Valid @ModelAttribute("memberDTO") MemberDTO memberDTO, org.springframework.validation.BindingResult bindingResult,
 			Model model, RedirectAttributes redirectAttributes) {
 		if (bindingResult.hasErrors()) {
@@ -147,6 +154,7 @@ public class MemberController {
 	}
 
 	@PostMapping("/{id}/delete")
+	@PreAuthorize("@menuSecurity.hasMenuDelete('" + MenuCodeConstants.MENU_MEMBERS + "')")
 	public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
 		try {
 			memberService.deleteMember(id);
@@ -158,6 +166,7 @@ public class MemberController {
 	}
 
 	@PostMapping("/{id}/subscribe")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_MEMBERS + "')")
 	public String subscribe(@PathVariable Long id, @RequestParam Long planId, RedirectAttributes redirectAttributes) {
 		try {
 			memberSubscriptionService.subscribe(new SubscribeMemberPlanRequest(id, planId, null));
@@ -169,6 +178,7 @@ public class MemberController {
 	}
 
 	@PostMapping("/{id}/subscriptions/{subscriptionId}/renew")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_MEMBERS + "')")
 	public String renew(@PathVariable Long id, @PathVariable Long subscriptionId, RedirectAttributes redirectAttributes) {
 		try {
 			memberSubscriptionService.renew(subscriptionId, null);
@@ -180,6 +190,7 @@ public class MemberController {
 	}
 
 	@PostMapping("/{id}/subscriptions/{subscriptionId}/topup")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_MEMBERS + "')")
 	public String topUp(@PathVariable Long id, @PathVariable Long subscriptionId, @RequestParam BigDecimal amount,
 			@RequestParam(required = false) String remark, RedirectAttributes redirectAttributes) {
 		try {
@@ -192,6 +203,7 @@ public class MemberController {
 	}
 
 	@PostMapping("/{id}/subscriptions/{subscriptionId}/cancel")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_MEMBERS + "')")
 	public String cancel(@PathVariable Long id, @PathVariable Long subscriptionId, RedirectAttributes redirectAttributes) {
 		try {
 			memberSubscriptionService.cancel(subscriptionId, null);

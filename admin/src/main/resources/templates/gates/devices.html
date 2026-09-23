@@ -64,6 +64,7 @@
                             </td>
                             <td class="text-end">
                                 <button type="button" class="btn btn-sm btn-outline-primary"
+                                		th:if="${@menuSecurity.checkMenuEdit('devices')}"
                                         onclick="openEditModal(this)"
                                         th:attr="data-id=${device.id},
                                                  data-devicetype=${device.deviceType},
@@ -83,7 +84,7 @@
                                                  data-remarks=${device.remarks}">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <form th:action="@{'/gates/' + ${gate.id} + '/devices/' + ${device.id} + '/delete'}" method="post" class="d-inline">
+                                <form th:if="${@menuSecurity.checkMenuDelete('devices')}" th:action="@{'/gates/' + ${gate.id} + '/devices/' + ${device.id} + '/delete'}" method="post" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Delete this device?"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>

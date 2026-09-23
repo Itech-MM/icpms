@@ -1,9 +1,11 @@
 package org.flexitech.projects.icpms.admin.controller;
 
 import org.flexitech.projects.icpms.common.CommonConstants;
+import org.flexitech.projects.icpms.common.MenuCodeConstants;
 import org.flexitech.projects.icpms.dto.api.request.member.MemberPlanRequest;
 import org.flexitech.projects.icpms.dto.member.MemberPlanDTO;
 import org.flexitech.projects.icpms.service.member.MemberPlanService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,6 +25,8 @@ public class MemberPlanController {
 	}
 
 	@GetMapping
+	@PreAuthorize("@menuSecurity.hasMenuAccess('" + MenuCodeConstants.MENU_MEMBER_PLANS
+			+ "') or @menuSecurity.hasMenuView('" + MenuCodeConstants.MENU_MEMBER_PLANS + "')")
 	public String list(Model model) {
 		model.addAttribute("plans", memberPlanService.getAllPlans());
 		model.addAttribute("pageTitle", "Member Plans");
@@ -31,6 +35,7 @@ public class MemberPlanController {
 	}
 
 	@GetMapping("/new")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_MEMBER_PLANS + "')")
 	public String createForm(Model model) {
 		model.addAttribute("planRequest", new MemberPlanRequest());
 		model.addAttribute("planId", null);
@@ -40,6 +45,7 @@ public class MemberPlanController {
 	}
 
 	@GetMapping("/{id}/edit")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_MEMBER_PLANS + "')")
 	public String editForm(@PathVariable Long id, Model model) {
 		MemberPlanDTO dto = memberPlanService.getPlanById(id);
 		MemberPlanRequest request = new MemberPlanRequest();
@@ -62,6 +68,7 @@ public class MemberPlanController {
 	}
 
 	@PostMapping
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_MEMBER_PLANS + "')")
 	public String create(@Valid @ModelAttribute("planRequest") MemberPlanRequest request, BindingResult bindingResult,
 			Model model, RedirectAttributes redirectAttributes) {
 		if (bindingResult.hasErrors()) {
@@ -82,6 +89,7 @@ public class MemberPlanController {
 	}
 
 	@PostMapping("/{id}")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_MEMBER_PLANS + "')")
 	public String update(@PathVariable Long id, @Valid @ModelAttribute("planRequest") MemberPlanRequest request,
 			BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
 		if (bindingResult.hasErrors()) {
@@ -102,6 +110,7 @@ public class MemberPlanController {
 	}
 
 	@PostMapping("/{id}/deactivate")
+	@PreAuthorize("@menuSecurity.hasMenuDelete('" + MenuCodeConstants.MENU_MEMBER_PLANS + "')")
 	public String deactivate(@PathVariable Long id, RedirectAttributes redirectAttributes) {
 		try {
 			memberPlanService.deactivatePlan(id);

@@ -1,6 +1,7 @@
 package org.flexitech.projects.icpms.admin.controller;
 
 import org.flexitech.projects.icpms.common.CommonConstants;
+import org.flexitech.projects.icpms.common.MenuCodeConstants;
 import org.flexitech.projects.icpms.common.enums.SlotStatus;
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
 import org.flexitech.projects.icpms.dto.slot.ParkingSlotBulkDTO;
@@ -12,6 +13,7 @@ import org.flexitech.projects.icpms.service.slot.ParkingSlotService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -40,6 +42,8 @@ public class ParkingSlotController {
 	}
 
 	@GetMapping
+	@PreAuthorize("@menuSecurity.hasMenuAccess('" + MenuCodeConstants.MENU_SLOTS
+			+ "') or @menuSecurity.hasMenuView('" + MenuCodeConstants.MENU_SLOTS + "')")
 	public String list(ParkingSlotSearchDTO searchDTO,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size,
@@ -64,9 +68,8 @@ public class ParkingSlotController {
 		return "slots/list";
 	}
 
-	
-
 	@GetMapping("/new")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_SLOTS + "')")
 	public String createForm(Model model) {
 	    model.addAttribute("slotDTO", new ParkingSlotDTO());
 	    loadFormRefData(model);
@@ -77,6 +80,7 @@ public class ParkingSlotController {
 	private static final int MAX_BULK_RANGE = 500;
 
 	@PostMapping("/bulk-save")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_SLOTS + "')")
 	public String bulkSave(@Valid @ModelAttribute("bulkDTO") ParkingSlotBulkDTO bulkDTO,
 	        BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
 
@@ -111,6 +115,7 @@ public class ParkingSlotController {
 	}
 
 	@GetMapping("/{id}/edit")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_SLOTS + "')")
 	public String editForm(@PathVariable Long id, Model model) throws Exception {
 		model.addAttribute("slotDTO", slotService.getSlotById(id));
 		loadFormRefData(model);
@@ -129,6 +134,7 @@ public class ParkingSlotController {
 	}
 
 	@PostMapping("/save")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_SLOTS + "')")
 	public String save(@Valid @ModelAttribute("slotDTO") ParkingSlotDTO slotDTO, org.springframework.validation.BindingResult bindingResult,
 			Model model, RedirectAttributes redirectAttributes) {
 		if (bindingResult.hasErrors()) {
@@ -146,6 +152,7 @@ public class ParkingSlotController {
 	}
 
 	@PostMapping("/{id}/delete")
+	@PreAuthorize("@menuSecurity.hasMenuDelete('" + MenuCodeConstants.MENU_SLOTS + "')")
 	public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
 		try {
 			slotService.deleteSlot(id);

@@ -6,7 +6,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Vehicles</h4>
-        <a th:href="@{/vehicles/new}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Vehicle</a>
+        <a th:if="${@menuSecurity.checkMenuEdit('vehicles')}" th:href="@{/vehicles/new}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Vehicle</a>
     </div>
 
     <div class="card mb-3">
@@ -58,8 +58,8 @@
                                 <span class="badge" th:classappend="${vehicle.status == 1} ? 'bg-success' : 'bg-secondary'" th:text="${vehicle.statusDesc}"></span>
                             </td>
                             <td class="text-end">
-                                <a th:href="@{'/vehicles/' + ${vehicle.id} + '/edit'}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
-                                <form th:action="@{'/vehicles/' + ${vehicle.id} + '/delete'}" method="post" class="d-inline">
+                                <a th:if="${@menuSecurity.checkMenuEdit('vehicles')}" th:href="@{'/vehicles/' + ${vehicle.id} + '/edit'}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <form th:if="${@menuSecurity.checkMenuDelete('vehicles')}" th:action="@{'/vehicles/' + ${vehicle.id} + '/delete'}" method="post" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Delete this vehicle?"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>

@@ -1,6 +1,8 @@
 package org.flexitech.projects.icpms.admin.controller;
 
+import org.flexitech.projects.icpms.common.MenuCodeConstants;
 import org.flexitech.projects.icpms.service.dashboard.DashboardService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +17,8 @@ public class HomeController {
 	}
 
 	@GetMapping("/")
+	@PreAuthorize("@menuSecurity.hasMenuAccess('" + MenuCodeConstants.MENU_DASHBOARD
+			+ "') or @menuSecurity.hasMenuView('" + MenuCodeConstants.MENU_DASHBOARD + "')")
 	public String dashboard(Model model) {
 		model.addAttribute("stats", dashboardService.getStats());
 		model.addAttribute("pageTitle", "Dashboard");

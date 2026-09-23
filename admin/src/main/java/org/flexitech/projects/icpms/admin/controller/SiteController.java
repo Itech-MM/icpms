@@ -1,6 +1,7 @@
 package org.flexitech.projects.icpms.admin.controller;
 
 import org.flexitech.projects.icpms.common.CommonConstants;
+import org.flexitech.projects.icpms.common.MenuCodeConstants;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
 import org.flexitech.projects.icpms.dto.site.SiteDTO;
@@ -9,6 +10,7 @@ import org.flexitech.projects.icpms.service.site.SiteService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +29,8 @@ public class SiteController {
 	}
 
 	@GetMapping
+	@PreAuthorize("@menuSecurity.hasMenuAccess('" + MenuCodeConstants.MENU_SITES
+			+ "') or @menuSecurity.hasMenuView('" + MenuCodeConstants.MENU_SITES + "')")
 	public String list(SiteSearchDTO searchDTO,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size,
@@ -50,6 +54,7 @@ public class SiteController {
 	}
 
 	@GetMapping("/new")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_SITES + "')")
 	public String createForm(Model model) {
 		model.addAttribute("siteDTO", new SiteDTO());
 		model.addAttribute("statuses", ActiveStatus.getAll());
@@ -59,6 +64,7 @@ public class SiteController {
 	}
 
 	@GetMapping("/{id}/edit")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_SITES + "')")
 	public String editForm(@PathVariable Long id, Model model) throws Exception {
 		model.addAttribute("siteDTO", siteService.getSiteById(id));
 		model.addAttribute("statuses", ActiveStatus.getAll());
@@ -68,6 +74,7 @@ public class SiteController {
 	}
 
 	@PostMapping("/save")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_SITES + "')")
 	public String save(@Valid @ModelAttribute("siteDTO") SiteDTO siteDTO, org.springframework.validation.BindingResult bindingResult,
 			Model model, RedirectAttributes redirectAttributes) {
 		if (bindingResult.hasErrors()) {
@@ -86,6 +93,7 @@ public class SiteController {
 	}
 
 	@PostMapping("/{id}/delete")
+	@PreAuthorize("@menuSecurity.hasMenuDelete('" + MenuCodeConstants.MENU_SITES + "')")
 	public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
 		try {
 			siteService.deleteSite(id);

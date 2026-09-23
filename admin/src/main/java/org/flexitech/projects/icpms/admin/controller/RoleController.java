@@ -1,8 +1,10 @@
 package org.flexitech.projects.icpms.admin.controller;
 
 import org.flexitech.projects.icpms.common.CommonConstants;
+import org.flexitech.projects.icpms.common.MenuCodeConstants;
 import org.flexitech.projects.icpms.dto.role.RoleDTO;
 import org.flexitech.projects.icpms.service.role.RoleService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,8 @@ public class RoleController {
 	}
 
 	@GetMapping
+	@PreAuthorize("@menuSecurity.hasMenuAccess('" + MenuCodeConstants.MENU_ROLES
+			+ "') or @menuSecurity.hasMenuView('" + MenuCodeConstants.MENU_ROLES + "')")
 	public String list(Model model) throws Exception {
 		model.addAttribute("roles", roleService.getAllRoles());
 		model.addAttribute("pageTitle", "Roles");
@@ -29,6 +33,7 @@ public class RoleController {
 	}
 
 	@GetMapping("/new")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_ROLES + "')")
 	public String createForm(Model model) {
 		model.addAttribute("roleDTO", new RoleDTO());
 		model.addAttribute("pageTitle", "New Role");
@@ -37,6 +42,7 @@ public class RoleController {
 	}
 
 	@GetMapping("/{id}/edit")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_ROLES + "')")
 	public String editForm(@PathVariable Long id, Model model) throws Exception {
 		model.addAttribute("roleDTO", roleService.getRoleById(id));
 		model.addAttribute("pageTitle", "Edit Role");
@@ -45,6 +51,7 @@ public class RoleController {
 	}
 
 	@PostMapping("/save")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_ROLES + "')")
 	public String save(@Valid @ModelAttribute("roleDTO") RoleDTO roleDTO, org.springframework.validation.BindingResult bindingResult,
 			Model model, RedirectAttributes redirectAttributes) {
 		if (bindingResult.hasErrors()) {
@@ -62,6 +69,7 @@ public class RoleController {
 	}
 
 	@PostMapping("/{id}/delete")
+	@PreAuthorize("@menuSecurity.hasMenuDelete('" + MenuCodeConstants.MENU_ROLES + "')")
 	public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
 		try {
 			roleService.deleteRole(id);

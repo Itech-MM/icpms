@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<body>
+	<div layout:fragment="content">
+
+		<link rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+		<style>
+input.flatpickr-input[readonly] {
+	background-color: var(--bs-body-bg);
+	cursor: pointer;
+}
+</style>
+
+		<h4 class="mb-3">Shift Report</h4>
+
+		<div class="card mb-3">
+			<div class="card-body">
+				<form th:action="@{/reports/shifts}" method="get"
+					class="row g-2 align-items-end">
+					<div class="col-md-2">
+						<label class="form-label small">Shift Code</label> <input
+							type="text" name="shiftCode" class="form-control form-control-sm"
+							th:value="${searchDTO.shiftCode}">
+					</div>
+					<div class="col-md-2">
+						<label class="form-label small">Status</label> <select
+							name="shiftStatus" class="form-select form-select-sm">
+							<option value="">-- All --</option>
+							<option th:each="s : ${statuses}" th:value="${s.code}"
+								th:text="${s.desc}"
+								th:selected="${searchDTO.shiftStatus != null and searchDTO.shiftStatus == s.code}"></option>
+						</select>
+					</div>
+					<div class="col-md-3">
+						<label class="form-label small">From</label> <input type="text"
+							id="fromDateTime" name="fromDateTime"
+							class="form-control form-control-sm"
+							placeholder="dd/MM/yyyy hh:mm a" autocomplete="off"
+							th:value="${searchDTO.fromDateTime}">
+					</div>
+					<div class="col-md-3">
+						<label class="form-label small">To</label> <input type="text"
+							id="toDateTime" name="toDateTime"
+							class="form-control form-control-sm"
+							placeholder="dd/MM/yyyy hh:mm a" autocomplete="off"
+							th:value="${searchDTO.toDateTime}">
+					</div>
+					<div class="col-md-1">
+						<button type="submit" class="btn btn-outline-primary btn-sm w-100">
+							<i class="bi bi-search"></i>
+						</button>
+					</div>
+					<div class="col-md-1">
+						<a th:href="@{/reports/shifts}"
+							class="btn btn-outline-secondary btn-sm w-100">Reset</a>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<div class="card mb-3">
+			<div class="card-body">
+				<span class="text-muted small"
+					th:text="${result.totalRecords} + ' shift(s) found'"></span>
+			</div>
+		</div>
+
+		<div class="card">
+			<div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-hover table-sm align-middle">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Code</th>
+								<th>Operator</th>
+								<th>Gate</th>
+								<th>Start Time</th>
+								<th>End Time</th>
+								<th>Status</th>
+								<th class="text-end">Opening Cash</th>
+								<th class="text-end">Closing Cash</th>
+								<th class="text-end">Diff</th>
+								<th>Remark</th>
+								<th>Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="shift : ${result.results}">
+								<td th:text="${shift.id}"></td>
+								<td th:text="${shift.code}"></td>
+								<td
+									th:text="${shift.operator != null} ? ${shift.operator.name} : '-'"></td>
+								<td th:text="${shift.gate != null} ? ${shift.gate.name} : '-'"></td>
+								<td th:text="${shift.startDateTime}"></td>
+								<td
+									th:text="${shift.endDateTime != null} ? ${shift.endDateTime} : '-'"></td>
+								<td><span class="badge"
+									th:classappend="${shift.shiftStatus == 1} ? 'bg-success' : 'bg-secondary'"
+									th:text="${shift.shiftStatusDesc}"></span></td>
+								<td class="text-end" th:text="${shift.openingCashDesc}"></td>
+								<td class="text-end" th:text="${shift.closingCashDesc}"></td>
+								<td class="text-end fw-bold"
+									th:classappend="${shift.diff.signum() < 0} ? 'text-danger' : (${shift.diff.signum() > 0} ? 'text-success' : '')"
+									th:text="${shift.diffDesc}"></td>
+								<td th:text="${shift.remark}"></td>
+								<td class="text-end"><a
+									th:href="@{/reports/shifts/{id}(id=${shift.id})}"
+									class="btn btn-outline-dark btn-sm"> <i class="bi bi-eye"></i>
+								</a></td>
+							</tr>
+							<tr th:if="${#lists.isEmpty(result.results)}">
+								<td colspan="12" class="text-center text-muted py-4">No
+									shifts found for the selected criteria.</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div
+					th:replace="~{fragments/pagination :: pager(${result}, ${pageUrlPrefix})}"></div>
+			</div>
+		</div>
+
+	</div>
+	<div layout:fragment="scripts">
+		<script>
+			(function() {
+				var fmt = "d/m/Y h:i K";
+
+				var toPicker = flatpickr("#toDateTime", {
+					enableTime : true,
+					time_24hr : false,
+					dateFormat : fmt,
+					minuteIncrement : 1
+				});
+
+				var fromPicker = flatpickr("#fromDateTime",
+						{
+							enableTime : true,
+							time_24hr : false,
+							dateFormat : fmt,
+							minuteIncrement : 1,
+							onChange : function(selectedDates) {
+								toPicker.set("minDate",
+										selectedDates.length ? selectedDates[0]
+												: null);
+							}
+						});
+
+				if (fromPicker.selectedDates.length) {
+					toPicker.set("minDate", fromPicker.selectedDates[0]);
+				}
+			})();
+		</script>
+	</div>
+</body>
+</html>

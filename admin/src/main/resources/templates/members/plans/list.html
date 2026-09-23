@@ -8,7 +8,7 @@
         <h4 class="mb-0">Member Plans</h4>
         <div>
             <a th:href="@{/members}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to Members</a>
-            <a th:href="@{/members/plans/new}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Plan</a>
+            <a th:if="${@menuSecurity.checkMenuEdit('member-plans')}" th:href="@{/members/plans/new}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Plan</a>
         </div>
     </div>
 
@@ -41,8 +41,8 @@
                                       th:text="${plan.isActive} ? 'Active' : 'Inactive'"></span>
                             </td>
                             <td class="text-end">
-                                <a th:href="@{'/members/plans/' + ${plan.id} + '/edit'}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
-                                <form th:if="${plan.isActive}" th:action="@{'/members/plans/' + ${plan.id} + '/deactivate'}" method="post" class="d-inline">
+                                <a th:if="${@menuSecurity.checkMenuEdit('member-plans')}" th:href="@{'/members/plans/' + ${plan.id} + '/edit'}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <form th:if="${plan.isActive and @menuSecurity.checkMenuDelete('member-plans')}" th:action="@{'/members/plans/' + ${plan.id} + '/deactivate'}" method="post" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Deactivate this plan?"><i class="bi bi-slash-circle"></i></button>
                                 </form>
                             </td>

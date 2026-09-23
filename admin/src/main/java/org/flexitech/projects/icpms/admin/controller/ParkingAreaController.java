@@ -1,6 +1,7 @@
 package org.flexitech.projects.icpms.admin.controller;
 
 import org.flexitech.projects.icpms.common.CommonConstants;
+import org.flexitech.projects.icpms.common.MenuCodeConstants;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
 import org.flexitech.projects.icpms.dto.parking.ParkingAreaDTO;
@@ -11,6 +12,7 @@ import org.flexitech.projects.icpms.service.tariff.TariffService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +35,8 @@ public class ParkingAreaController {
 	}
 
 	@GetMapping
+	@PreAuthorize("@menuSecurity.hasMenuAccess('" + MenuCodeConstants.MENU_PARKING_AREAS
+			+ "') or @menuSecurity.hasMenuView('" + MenuCodeConstants.MENU_PARKING_AREAS + "')")
 	public String list(ParkingAreaSearchDTO searchDTO,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size,
@@ -58,6 +62,7 @@ public class ParkingAreaController {
 	}
 
 	@GetMapping("/new")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_PARKING_AREAS + "')")
 	public String createForm(Model model) {
 		model.addAttribute("parkingAreaDTO", new ParkingAreaDTO());
 		loadFormRefData(model);
@@ -66,6 +71,7 @@ public class ParkingAreaController {
 	}
 
 	@GetMapping("/{id}/edit")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_PARKING_AREAS + "')")
 	public String editForm(@PathVariable Long id, Model model) throws Exception {
 		model.addAttribute("parkingAreaDTO", parkingAreaService.getParkingAreaById(id));
 		loadFormRefData(model);
@@ -75,13 +81,12 @@ public class ParkingAreaController {
 
 	private void loadFormRefData(Model model) {
 		model.addAttribute("statuses", ActiveStatus.getAll());
-		/* model.addAttribute("gates", gateService.findAllActiveGates()); */
 		model.addAttribute("tariffList", this.tariffService.findAllActiveTariffs());
-
 		model.addAttribute("activeMenu", "parking-areas");
 	}
 
 	@PostMapping("/save")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_PARKING_AREAS + "')")
 	public String save(@Valid @ModelAttribute("parkingAreaDTO") ParkingAreaDTO parkingAreaDTO,
 			org.springframework.validation.BindingResult bindingResult,
 			Model model, RedirectAttributes redirectAttributes) {
@@ -100,6 +105,7 @@ public class ParkingAreaController {
 	}
 
 	@PostMapping("/{id}/delete")
+	@PreAuthorize("@menuSecurity.hasMenuDelete('" + MenuCodeConstants.MENU_PARKING_AREAS + "')")
 	public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
 		try {
 			parkingAreaService.deleteParkingArea(id);

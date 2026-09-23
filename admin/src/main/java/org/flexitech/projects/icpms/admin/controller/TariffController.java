@@ -1,6 +1,7 @@
 package org.flexitech.projects.icpms.admin.controller;
 
 import org.flexitech.projects.icpms.common.CommonConstants;
+import org.flexitech.projects.icpms.common.MenuCodeConstants;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
 import org.flexitech.projects.icpms.dto.tariff.TariffDTO;
@@ -10,6 +11,7 @@ import org.flexitech.projects.icpms.service.tariff.TariffService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +30,8 @@ public class TariffController {
 	}
 
 	@GetMapping
+	@PreAuthorize("@menuSecurity.hasMenuAccess('" + MenuCodeConstants.MENU_TARIFFS
+			+ "') or @menuSecurity.hasMenuView('" + MenuCodeConstants.MENU_TARIFFS + "')")
 	public String list(TariffSearchDTO searchDTO,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size,
@@ -51,6 +55,7 @@ public class TariffController {
 	}
 
 	@GetMapping("/new")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_TARIFFS + "')")
 	public String createForm(Model model) {
 		model.addAttribute("tariffDTO", new TariffDTO());
 		model.addAttribute("statuses", ActiveStatus.getAll());
@@ -60,6 +65,7 @@ public class TariffController {
 	}
 
 	@GetMapping("/{id}/edit")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_TARIFFS + "')")
 	public String editForm(@PathVariable Long id, Model model) throws Exception {
 		model.addAttribute("tariffDTO", tariffService.getTariffById(id));
 		model.addAttribute("statuses", ActiveStatus.getAll());
@@ -69,6 +75,7 @@ public class TariffController {
 	}
 
 	@PostMapping("/save")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_TARIFFS + "')")
 	public String save(@Valid @ModelAttribute("tariffDTO") TariffDTO tariffDTO, org.springframework.validation.BindingResult bindingResult,
 			Model model, RedirectAttributes redirectAttributes) {
 		if (bindingResult.hasErrors()) {
@@ -90,6 +97,7 @@ public class TariffController {
 	}
 
 	@PostMapping("/{id}/delete")
+	@PreAuthorize("@menuSecurity.hasMenuDelete('" + MenuCodeConstants.MENU_TARIFFS + "')")
 	public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
 		try {
 			tariffService.deleteTariff(id);
@@ -101,6 +109,8 @@ public class TariffController {
 	}
 
 	@GetMapping("/{id}/rates")
+	@PreAuthorize("@menuSecurity.hasMenuAccess('" + MenuCodeConstants.MENU_TARIFFS
+			+ "') or @menuSecurity.hasMenuView('" + MenuCodeConstants.MENU_TARIFFS + "')")
 	public String rates(@PathVariable Long id, Model model) throws Exception {
 		model.addAttribute("tariffDTO", tariffService.getTariffById(id));
 		model.addAttribute("newRate", new TariffRateDTO());
@@ -110,6 +120,7 @@ public class TariffController {
 	}
 
 	@PostMapping("/{id}/rates/save")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_TARIFFS + "')")
 	public String saveRate(@PathVariable Long id, @ModelAttribute TariffRateDTO rateDTO, RedirectAttributes redirectAttributes) {
 		try {
 			rateDTO.setTariffId(id);
@@ -123,6 +134,7 @@ public class TariffController {
 	}
 
 	@PostMapping("/{id}/rates/{rateId}/delete")
+	@PreAuthorize("@menuSecurity.hasMenuDelete('" + MenuCodeConstants.MENU_TARIFFS + "')")
 	public String deleteRate(@PathVariable Long id, @PathVariable Long rateId, RedirectAttributes redirectAttributes) {
 		try {
 			tariffService.deleteRate(rateId);

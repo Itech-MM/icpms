@@ -6,7 +6,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Parking Areas</h4>
-        <a th:href="@{/parking-areas/new}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Parking Area</a>
+        <a th:if="${@menuSecurity.checkMenuEdit('parking-areas')}" th:href="@{/parking-areas/new}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Parking Area</a>
     </div>
 
     <div class="card mb-3">
@@ -71,8 +71,8 @@
                                 <span class="badge" th:classappend="${area.status == 1} ? 'bg-success' : 'bg-secondary'" th:text="${area.status == 1} ? 'Active' : 'Inactive'"></span>
                             </td>
                             <td class="text-end">
-                                <a th:href="@{'/parking-areas/' + ${area.id} + '/edit'}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
-                                <form th:action="@{'/parking-areas/' + ${area.id} + '/delete'}" method="post" class="d-inline">
+                                <a th:if="${@menuSecurity.checkMenuEdit('parking-areas')}" th:href="@{'/parking-areas/' + ${area.id} + '/edit'}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <form th:if="${@menuSecurity.checkMenuDelete('parking-areas')}" th:action="@{'/parking-areas/' + ${area.id} + '/delete'}" method="post" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Delete this parking area?"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>

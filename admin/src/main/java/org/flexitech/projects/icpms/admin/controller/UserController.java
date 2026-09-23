@@ -1,6 +1,7 @@
 package org.flexitech.projects.icpms.admin.controller;
 
 import org.flexitech.projects.icpms.common.CommonConstants;
+import org.flexitech.projects.icpms.common.MenuCodeConstants;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
 import org.flexitech.projects.icpms.dto.user.UserDTO;
@@ -10,6 +11,7 @@ import org.flexitech.projects.icpms.service.user.UserService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +32,8 @@ public class UserController {
 	}
 
 	@GetMapping
+	@PreAuthorize("@menuSecurity.hasMenuAccess('" + MenuCodeConstants.MENU_USERS
+			+ "') or @menuSecurity.hasMenuView('" + MenuCodeConstants.MENU_USERS + "')")
 	public String list(UserSearchDTO searchDTO,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size,
@@ -52,6 +56,7 @@ public class UserController {
 	}
 
 	@GetMapping("/new")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_USERS + "')")
 	public String createForm(Model model) throws Exception {
 		model.addAttribute("userDTO", new UserDTO());
 		loadFormRefData(model);
@@ -60,6 +65,7 @@ public class UserController {
 	}
 
 	@GetMapping("/{id}/edit")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_USERS + "')")
 	public String editForm(@PathVariable Long id, Model model) throws Exception {
 		model.addAttribute("userDTO", userService.getUserById(id));
 		loadFormRefData(model);
@@ -74,6 +80,7 @@ public class UserController {
 	}
 
 	@PostMapping("/save")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_USERS + "')")
 	public String save(@Valid @ModelAttribute("userDTO") UserDTO userDTO, org.springframework.validation.BindingResult bindingResult,
 			Model model, RedirectAttributes redirectAttributes) throws Exception {
 		if (bindingResult.hasErrors()) {
@@ -91,6 +98,7 @@ public class UserController {
 	}
 
 	@PostMapping("/{id}/delete")
+	@PreAuthorize("@menuSecurity.hasMenuDelete('" + MenuCodeConstants.MENU_USERS + "')")
 	public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
 		try {
 			userService.deleteUser(id);

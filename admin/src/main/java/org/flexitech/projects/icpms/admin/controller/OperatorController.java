@@ -2,6 +2,7 @@ package org.flexitech.projects.icpms.admin.controller;
 
 import org.flexitech.projects.icpms.admin.controller.validator.OperatorValidator;
 import org.flexitech.projects.icpms.common.CommonConstants;
+import org.flexitech.projects.icpms.common.MenuCodeConstants;
 import org.flexitech.projects.icpms.common.enums.ActiveStatus;
 import org.flexitech.projects.icpms.common.enums.OperatorRole;
 import org.flexitech.projects.icpms.dto.SearchResultDTO;
@@ -12,6 +13,7 @@ import org.flexitech.projects.icpms.service.site.SiteService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
@@ -47,6 +49,8 @@ public class OperatorController {
 	}
 
 	@GetMapping
+	@PreAuthorize("@menuSecurity.hasMenuAccess('" + MenuCodeConstants.MENU_OPERATORS
+			+ "') or @menuSecurity.hasMenuView('" + MenuCodeConstants.MENU_OPERATORS + "')")
 	public String list(OperatorSearchDTO searchDTO, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, Model model) throws Exception {
 
@@ -75,6 +79,7 @@ public class OperatorController {
 	}
 
 	@GetMapping("/new")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_OPERATORS + "')")
 	public String createForm(Model model) {
 		model.addAttribute("operatorDTO", new OperatorDTO());
 		loadFormRefData(model);
@@ -83,6 +88,7 @@ public class OperatorController {
 	}
 
 	@GetMapping("/{id}/edit")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_OPERATORS + "')")
 	public String editForm(@PathVariable Long id, Model model) throws Exception {
 		model.addAttribute("operatorDTO", operatorService.getOperatorById(id));
 		loadFormRefData(model);
@@ -91,6 +97,7 @@ public class OperatorController {
 	}
 
 	@PostMapping("/{id}/change-password")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_OPERATORS + "')")
 	public String changePassword(@PathVariable Long id, @RequestParam String newPassword,
 			@RequestParam String confirmPassword, RedirectAttributes redirectAttributes) {
 		try {
@@ -105,6 +112,7 @@ public class OperatorController {
 	}
 
 	@PostMapping("/{id}/change-pin")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_OPERATORS + "')")
 	public String changePin(@PathVariable Long id, @RequestParam String newPin, @RequestParam String confirmPin,
 			RedirectAttributes redirectAttributes) {
 		try {
@@ -125,6 +133,7 @@ public class OperatorController {
 	}
 
 	@PostMapping("/save")
+	@PreAuthorize("@menuSecurity.hasMenuEdit('" + MenuCodeConstants.MENU_OPERATORS + "')")
 	public String save(@Valid @ModelAttribute("operatorDTO") OperatorDTO operatorDTO,
 			org.springframework.validation.BindingResult bindingResult, Model model,
 			RedirectAttributes redirectAttributes) {
@@ -144,6 +153,7 @@ public class OperatorController {
 	}
 
 	@PostMapping("/{id}/delete")
+	@PreAuthorize("@menuSecurity.hasMenuDelete('" + MenuCodeConstants.MENU_OPERATORS + "')")
 	public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
 		try {
 			operatorService.deleteOperator(id);

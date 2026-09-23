@@ -6,7 +6,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Sites</h4>
-        <a th:href="@{/sites/new}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Site</a>
+        <a th:if="${@menuSecurity.checkMenuEdit('sites')}" th:href="@{/sites/new}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Site</a>
     </div>
 
     <div class="card mb-3">
@@ -61,8 +61,8 @@
                             </td>
                             <td class="text-end">
                                 <a th:href="@{'/gates?siteId=' + ${site.id}}" class="btn btn-sm btn-outline-secondary" title="View Gates"><i class="bi bi-sign-turn-right"></i></a>
-                                <a th:href="@{'/sites/' + ${site.id} + '/edit'}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
-                                <form th:action="@{'/sites/' + ${site.id} + '/delete'}" method="post" class="d-inline">
+                                <a th:if="${@menuSecurity.checkMenuEdit('sites')}" th:href="@{'/sites/' + ${site.id} + '/edit'}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <form th:if="${@menuSecurity.checkMenuDelete('sites')}" th:action="@{'/sites/' + ${site.id} + '/delete'}" method="post" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Delete this site?"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>

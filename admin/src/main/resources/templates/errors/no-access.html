@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Access Denied</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6 text-center">
+                    <!-- Error Icon -->
+                    <div class="mb-4">
+                        <i class="fas fa-lock fa-5x text-danger"></i>
+                    </div>
+                    
+                    <!-- Error Message -->
+                    <h1 class="h3 mb-3 text-gray-800">Access Denied</h1>
+                    
+                    <div th:if="${menuCode}" class="card shadow mb-4">
+                        <div class="card-body">
+                            <p class="mb-2">
+                                <strong>Menu:</strong> 
+                                <span th:text="${menuCode}"></span>
+                            </p>
+                            <p class="mb-2">
+                                <strong>Required Permission:</strong> 
+                                <span th:text="${requiredPermission}"></span>
+                            </p>
+                            <p class="mb-0 text-muted">
+                                You don't have the necessary permissions to access this menu.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div th:unless="${menuCode}" class="mb-4">
+                        <p class="text-muted" th:text="${errorMessage ?: 'You do not have permission to access this resource.'}"></p>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-center gap-3 mt-4">
+                        <a th:href="@{/}" class="btn btn-primary">
+                            <i class="fas fa-home mr-2"></i> Go to Dashboard
+                        </a>
+                        
+                        <button onclick="history.back()" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left mr-2"></i> Go Back
+                        </button>
+                        
+                        <a th:href="@{/logout}" class="btn btn-outline-danger">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                        </a>
+                    </div>
+                    
+                    <!-- Request Info (for debugging) -->
+                    <div class="mt-5 pt-4 border-top">
+                        <small class="text-muted">
+                            Requested URL: <code th:text="${requestedUrl}"></code>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- <div layout:fragment="scripts">
+        <script th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(function() {
+                    window.location.href = /*[[@{/}]]*/ '/';
+                }, 10000);
+                
+                // Show countdown
+                let countdown = 10;
+                const countdownElement = document.getElementById('countdown');
+                if (countdownElement) {
+                    setInterval(function() {
+                        countdown--;
+                        countdownElement.textContent = countdown;
+                        if (countdown <= 0) {
+                            window.location.href = /*[[@{/}]]*/ '/';
+                        }
+                    }, 1000);
+                }
+            });
+        </script>
+    </div> -->
+</body>
+</html>

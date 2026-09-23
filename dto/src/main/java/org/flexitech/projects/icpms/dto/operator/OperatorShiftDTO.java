@@ -47,6 +47,10 @@ public class OperatorShiftDTO extends CommonDTO {
 	private String diffDesc;
 
 	private String remark;
+	
+	private BigDecimal totalRevenue;
+	
+	private String totalRevenueDesc;
 
 	public OperatorShiftDTO(OperatorShift o) {
 		super(o);

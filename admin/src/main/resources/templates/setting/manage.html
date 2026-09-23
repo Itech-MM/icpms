@@ -6,30 +6,228 @@
     <title>System Settings</title>
     <th:block layout:fragment="page-css">
         <style>
-            .setting-card {
-                border: none;
-                border-radius: 14px;
-                transition: transform .15s ease, box-shadow .15s ease;
+            .st {
+                --st-line: var(--steel-700);
+                --st-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
             }
-            .setting-card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 20px rgba(0,0,0,.08) !important;
+            .st-header {
+                display: flex;
+                align-items: stretch;
+                background: var(--steel-900);
+                color: #fff;
+                border-left: 8px solid var(--info-light);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                margin-bottom: 1rem;
+                overflow: hidden;
             }
-            .setting-icon {
-                width: 42px; height: 42px;
-                border-radius: 10px;
-                background: #eef2ff;
-                color: #4f46e5;
-                display: flex; align-items: center; justify-content: center;
-                font-size: 18px;
+            .st-header-main {
+                padding: 1rem 1.25rem;
+                flex: 1;
             }
-            .setting-code { font-weight: 600; font-size: .95rem; }
-            .setting-desc { font-size: .8rem; color: #6c757d; }
-            .setting-updated { font-size: .72rem; color: #adb5bd; }
-            .input-wrap { min-width: 260px; }
-            .form-switch .form-check-input { width: 2.6em; height: 1.4em; cursor: pointer; }
-            .badge-readonly { font-size: .7rem; }
+            .st-eyebrow {
+                font-size: .7rem;
+                letter-spacing: .18em;
+                text-transform: uppercase;
+                color: var(--steel-300);
+                font-weight: 600;
+            }
+            .st-title {
+                font-family: var(--st-mono);
+                font-size: 1.6rem;
+                font-weight: 700;
+                margin: 0;
+                letter-spacing: .02em;
+                color: #fff;
+            }
+            .st-subtitle {
+                font-size: .8rem;
+                color: var(--steel-300);
+                margin: .1rem 0 0;
+            }
+            .st-header-side {
+                display: flex;
+                align-items: stretch;
+                background: var(--steel-800);
+            }
+            .st-save {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: .5rem;
+                padding: 1rem 1.75rem;
+                background: var(--brand);
+                color: var(--on-brand);
+                border: 0;
+                border-radius: 0;
+                font-size: .72rem;
+                letter-spacing: .12em;
+                text-transform: uppercase;
+                font-weight: 600;
+                transition: background-color .15s ease;
+            }
+            .st-save:hover:not(:disabled) { background: var(--brand-dark); }
+            .st-save:disabled { opacity: .7; cursor: wait; }
+
+            .st-panel {
+                border: 2px solid var(--st-line);
+                border-radius: var(--radius);
+                background: var(--surface);
+                box-shadow: var(--shadow-sm);
+                overflow: hidden;
+            }
+            .st-panel-head {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: .65rem 1rem;
+                background: var(--steel-900);
+                color: #fff;
+            }
+            .st-panel-title {
+                font-size: .78rem;
+                letter-spacing: .16em;
+                text-transform: uppercase;
+                font-weight: 600;
+                margin: 0;
+                color: #fff;
+            }
+            .st-count {
+                font-family: var(--st-mono);
+                font-size: .8rem;
+                background: var(--brand);
+                color: var(--on-brand);
+                border-radius: var(--radius-sm);
+                padding: .15rem .6rem;
+                font-weight: 700;
+            }
+
+            .st-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 1rem;
+                padding: .9rem 1rem;
+                border-bottom: 1px solid var(--border-soft);
+                transition: background-color .15s ease;
+            }
+            .st-row:last-child { border-bottom: 0; }
+            .st-row:hover { background: var(--steel-100); }
+            .st-info {
+                display: flex;
+                align-items: center;
+                gap: .9rem;
+                min-width: 0;
+            }
+            .st-icon {
+                width: 40px;
+                height: 40px;
+                flex: 0 0 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.05rem;
+                color: var(--brand);
+                background: var(--brand-light);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-sm);
+            }
+            .st-code {
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: .5rem;
+                font-family: var(--st-mono);
+                font-size: .9rem;
+                font-weight: 700;
+                letter-spacing: .03em;
+                color: var(--text);
+            }
+            .st-desc {
+                font-size: .8rem;
+                color: var(--text-muted);
+                margin-top: .1rem;
+            }
+            .st-updated {
+                font-family: var(--st-mono);
+                font-size: .7rem;
+                color: var(--steel-500);
+                margin-top: .15rem;
+            }
+            .st-tag {
+                display: inline-block;
+                font-family: var(--bs-body-font-family);
+                font-size: .62rem;
+                letter-spacing: .1em;
+                text-transform: uppercase;
+                font-weight: 600;
+                padding: .1rem .45rem;
+                border-radius: var(--radius-sm);
+                background: var(--steel-200);
+                color: var(--steel-700);
+            }
+
+            .st-input { min-width: 260px; }
+            .st-input .form-control {
+                font-family: var(--st-mono);
+                font-size: .85rem;
+                color: var(--text);
+                border-color: var(--border);
+                border-radius: var(--radius-sm);
+            }
+            .st-input .form-control:focus {
+                border-color: var(--brand);
+                box-shadow: 0 0 0 .15rem rgba(11, 96, 104, .18);
+            }
+            .st-input .form-control:disabled {
+                background: var(--steel-100);
+                color: var(--steel-500);
+            }
+            .st-addon {
+                display: flex;
+                align-items: center;
+                background: var(--steel-100);
+                color: var(--steel-500);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-sm);
+            }
+            .input-group > .st-addon:first-child {
+                border-right: 0;
+                border-top-right-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+            .input-group > .st-addon:last-child {
+                border-left: 0;
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
+            }
+            .input-group > .form-control:not(:last-child) {
+                border-top-right-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+            .input-group > .form-control:not(:first-child) {
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
+            }
             .toggle-password { cursor: pointer; }
+            .toggle-password:hover { color: var(--brand); }
+
+            .form-switch .form-check-input {
+                width: 2.6em;
+                height: 1.4em;
+                cursor: pointer;
+                border-color: var(--steel-500);
+            }
+            .form-switch .form-check-input:checked {
+                background-color: var(--brand);
+                border-color: var(--brand);
+            }
+            .form-switch .form-check-input:focus {
+                box-shadow: 0 0 0 .15rem rgba(11, 96, 104, .18);
+            }
+            .form-switch .form-check-input:disabled { cursor: not-allowed; }
+
             .spin {
                 display: inline-block;
                 animation: spin 1s linear infinite;
@@ -38,42 +236,60 @@
                 from { transform: rotate(0deg); }
                 to { transform: rotate(360deg); }
             }
+
+            @media (max-width: 767.98px) {
+                .st-input { min-width: 100%; width: 100%; }
+                .st-header { flex-wrap: wrap; }
+                .st-header-side { width: 100%; }
+                .st-save { flex: 1; }
+            }
         </style>
     </th:block>
 </head>
 <body>
-<div layout:fragment="content">
+<div layout:fragment="content"
+     th:with="canEditSettings=${@menuSecurity.checkMenuEdit('settings')}">
 
-    <div class="container">
-        <div class="d-flex align-items-center justify-content-between mb-4">
-            <div>
-                <h4 class="mb-0"><i class="bi bi-sliders text-primary me-2"></i>System Settings</h4>
-                <p class="text-muted mb-0">Manage application configuration values</p>
+    <div class="st">
+
+        <div class="st-header">
+            <div class="st-header-main">
+                <div class="st-eyebrow">Administration / Settings</div>
+                <h4 class="st-title">System Settings</h4>
+                <p class="st-subtitle">Manage application configuration values</p>
             </div>
-            <button type="button" class="btn btn-primary px-4" id="saveSettingsBtn">
-                <i class="bi bi-save me-1"></i> Save Changes
-            </button>
+            <div class="st-header-side" th:if="${canEditSettings}">
+                <button type="button" class="st-save" id="saveSettingsBtn">
+                    <i class="bi bi-save"></i> Save Changes
+                </button>
+            </div>
         </div>
 
-        <div id="settingForm">
-            <div class="card setting-card shadow-sm mb-3"
-                 th:each="setting, iStat : ${dto.settings}">
-                <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="st-panel">
+            <div class="st-panel-head">
+                <h5 class="st-panel-title">Configuration</h5>
+                <span class="st-count" th:text="${#lists.size(dto.settings)}">0</span>
+            </div>
 
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="setting-icon">
+            <div id="settingForm">
+                <div class="st-row" th:each="setting, iStat : ${dto.settings}">
+
+                    <div class="st-info">
+                        <div class="st-icon">
                             <i class="" th:classappend="${setting.icon}"></i>
                         </div>
                         <div>
-                            <div class="setting-code">
+                            <div class="st-code">
                                 <span th:text="${setting.code}">CODE</span>
-                                <span class="badge bg-secondary-subtle text-secondary badge-readonly ms-1"
-                                      th:if="${setting.editableStatus == 0}">
-                                    <i class="bi bi-lock-fill" style="font-size:.65rem;"></i> read-only
+                                <span class="st-tag" th:if="${setting.editableStatus == 0}">
+                                    <i class="bi bi-lock-fill"></i> read-only
+                                </span>
+                                <span class="st-tag" th:if="${setting.editableStatus != 0 and !canEditSettings}">
+                                    <i class="bi bi-lock-fill"></i> no access
                                 </span>
                             </div>
-                            <div class="setting-desc" th:text="${setting.description}">description</div>
-                            <div class="setting-updated" th:if="${setting.updatedByName != null}">
+                            <div class="st-desc" th:text="${setting.description}">description</div>
+                            <div class="st-updated" th:if="${setting.updatedByName != null}">
                                 <i class="bi bi-clock-history me-1"></i>Updated by
                                 <span th:text="${setting.updatedByName}">name</span>
                                 <span th:if="${setting.updatedTime != null}" th:text="'· ' + ${setting.updatedTime}"> · date</span>
@@ -81,33 +297,33 @@
                         </div>
                     </div>
 
-                    <div class="input-wrap">
+                    <div class="st-input">
                         <div class="input-group" th:if="${setting.inputType == 1}">
-                            <span class="input-group-text bg-white"><i class="bi bi-cursor-text text-muted"></i></span>
+                            <span class="input-group-text st-addon"><i class="bi bi-cursor-text"></i></span>
                             <input type="text"
                                    class="form-control setting-value"
                                    th:value="${setting.value}"
                                    th:data-id="${setting.id}"
                                    th:data-original="${setting.value}"
-                                   th:disabled="${setting.editableStatus == 0}"
+                                   th:disabled="${setting.editableStatus == 0 or !canEditSettings}"
                                    placeholder="Enter value" />
                         </div>
 
                         <div class="input-group" th:if="${setting.inputType == 2}">
-                            <span class="input-group-text bg-white"><i class="bi bi-hash text-muted"></i></span>
+                            <span class="input-group-text st-addon"><i class="bi bi-hash"></i></span>
                             <input type="number"
                                    class="form-control setting-value"
                                    th:value="${setting.value}"
                                    th:data-id="${setting.id}"
                                    th:data-original="${setting.value}"
-                                   th:disabled="${setting.editableStatus == 0}" />
+                                   th:disabled="${setting.editableStatus == 0 or !canEditSettings}" />
                         </div>
 
                         <div class="form-check form-switch d-flex justify-content-end" th:if="${setting.inputType == 3}">
                             <input class="form-check-input toggle-input" type="checkbox" role="switch"
                                    th:id="${'toggle_' + iStat.index}"
                                    th:checked="${setting.value == '1'}"
-                                   th:disabled="${setting.editableStatus == 0}"
+                                   th:disabled="${setting.editableStatus == 0 or !canEditSettings}"
                                    th:attr="onchange=|document.getElementById('hidden_${iStat.index}').value = this.checked ? '1' : '0';|" />
                             <input type="hidden"
                                    class="setting-value"
@@ -118,13 +334,13 @@
                         </div>
 
                         <div class="input-group" th:if="${setting.inputType == 4}">
-                            <span class="input-group-text bg-white"><i class="bi bi-calendar3 text-muted"></i></span>
+                            <span class="input-group-text st-addon"><i class="bi bi-calendar3"></i></span>
                             <input type="date"
                                    class="form-control setting-value"
                                    th:value="${setting.value}"
                                    th:data-id="${setting.id}"
                                    th:data-original="${setting.value}"
-                                   th:disabled="${setting.editableStatus == 0}" />
+                                   th:disabled="${setting.editableStatus == 0 or !canEditSettings}" />
                         </div>
 
                         <div class="input-group" th:if="${setting.inputType == 5}">
@@ -133,8 +349,8 @@
                                    th:value="${setting.value}"
                                    th:data-id="${setting.id}"
                                    th:data-original="${setting.value}"
-                                   th:disabled="${setting.editableStatus == 0}" />
-                            <span class="input-group-text bg-white toggle-password">
+                                   th:disabled="${setting.editableStatus == 0 or !canEditSettings}" />
+                            <span class="input-group-text st-addon toggle-password">
                                 <i class="bi bi-eye"></i>
                             </span>
                         </div>
@@ -146,12 +362,13 @@
                                    th:value="${setting.value}"
                                    th:data-id="${setting.id}"
                                    th:data-original="${setting.value}"
-                                   th:disabled="${setting.editableStatus == 0}" />
+                                   th:disabled="${setting.editableStatus == 0 or !canEditSettings}" />
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 
 </div>
@@ -211,7 +428,7 @@
 
                 const $btn = $(this);
                 const originalText = $btn.html();
-                $btn.prop('disabled', true).html('<i class="bi bi-arrow-repeat spin me-1"></i> Saving...');
+                $btn.prop('disabled', true).html('<i class="bi bi-arrow-repeat spin"></i> Saving...');
 
                 $.ajax({
                     url: batchUpdateUrl,

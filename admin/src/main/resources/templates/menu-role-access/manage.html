@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<title>Menu Role Access Management</title>
+
+<style>
+.tree-card{
+	overflow: hidden;
+}
+.tree-container {
+	max-height: 70vh;
+	overflow-y: auto;
+	border: 1px solid #dee2e6;
+	background: #fff;
+}
+
+.tree-node {
+	padding: 8px 0px 8px 8px;
+	border-bottom: 1px solid #f1f1f1;
+	transition: all 0.2s;
+}
+
+.tree-node:hover {
+	background-color: #f8f9fa;
+}
+
+.node-content {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+}
+
+.node-toggle {
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 8px;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.node-toggle i {
+	font-size: 14px;
+	transition: transform 0.2s;
+}
+
+.node-toggle.collapsed i {
+	transform: rotate(-90deg);
+}
+
+.node-icon {
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 12px;
+	color: #6c757d;
+}
+
+.node-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.node-title {
+	font-weight: 500;
+	color: #212529;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.node-url {
+	font-size: 12px;
+	color: #6c757d;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.permission-checkboxes {
+	display: flex;
+	gap: 15px;
+	margin-left: 20px;
+	flex-shrink: 0;
+}
+
+.permission-checkbox-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-width: 60px;
+}
+
+.permission-label {
+	font-size: 11px;
+	color: #6c757d;
+	margin-top: 2px;
+}
+
+.permission-badge {
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 6px;
+	font-size: 14px;
+}
+
+.badge-view {
+	background-color: #e8f4ff;
+	color: #0d6efd;
+	border: 2px solid #0d6efd;
+}
+
+.badge-access {
+	background-color: #d1f2eb;
+	color: #198754;
+	border: 2px solid #198754;
+}
+
+.badge-edit {
+	background-color: #fff3cd;
+	color: #ffc107;
+	border: 2px solid #ffc107;
+}
+
+.badge-delete {
+	background-color: #f8d7da;
+	color: #dc3545;
+	border: 2px solid #dc3545;
+}
+
+.child-level-1 {
+	padding-left: 40px;
+}
+
+.child-level-2 {
+	padding-left: 70px;
+}
+
+.child-level-3 {
+	padding-left: 100px;
+}
+
+.loading-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(255, 255, 255, 0.8);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+	border-radius: 8px;
+}
+
+.tree-header {
+	position: sticky;
+	top: 0;
+	background: white;
+	z-index: 10;
+	padding: 15px;
+	border-bottom: 1px solid #dee2e6;
+}
+
+.legend-item {
+	display: inline-flex;
+	align-items: center;
+	margin-right: 15px;
+	margin-bottom: 5px;
+}
+
+.legend-badge {
+	width: 16px;
+	height: 16px;
+	border-radius: 4px;
+	margin-right: 6px;
+}
+
+.form-check-input:checked {
+	background-color: #0d6efd;
+	border-color: #0d6efd;
+}
+
+.form-check-input {
+	width: 1.2em;
+	height: 1.2em;
+	cursor: pointer;
+}
+
+.text-primary {
+	color: #0d6efd !important;
+}
+
+.text-success {
+	color: #198754 !important;
+}
+
+.text-warning {
+	color: #ffc107 !important;
+}
+
+.text-danger {
+	color: #dc3545 !important;
+}
+#treeStats{
+	min-width: 30px;
+}
+</style>
+</head>
+<body>
+	<div layout:fragment="content">
+		<div class="container-fluid py-4">
+			<div class="d-flex justify-content-between align-items-center mb-4">
+				<div>
+					<h1 class="h3 mb-0">
+						<i class="fas fa-shield-alt text-primary me-2"></i> Menu Role
+						Access Management
+					</h1>
+					<p class="text-muted mb-0">Manage menu permissions for
+						different roles</p>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 mb-4">
+					<div class="card">
+						<div class="card-header bg-light">
+							<h5 class="mb-0">
+								<i class="fas fa-user-tag me-2"></i>Role Selection
+							</h5>
+						</div>
+						<div class="card-body">
+							<div class="row align-items-end">
+								<div class="col-md-4">
+									<label class="form-label fw-semibold">Select Role</label> <select
+										id="roleSelect" class="form-select">
+										<option value="">-- Select a Role --</option>
+										<option th:each="role : ${roles}" th:value="${role.id}"
+											th:text="${role.name}"></option>
+									</select>
+								</div>
+								<div class="col-md-8">
+									<div id="roleInfo" class="alert alert-light d-none mb-0">
+										<div class="d-flex justify-content-between align-items-center">
+											<div>
+												<strong id="selectedRoleName"></strong>
+												<div class="small text-muted" id="selectedRoleDescription"></div>
+											</div>
+											<div class="d-flex gap-2">
+												<button id="btnCopyPermissions"
+													class="btn btn-outline-primary btn-sm">
+													<i class="fas fa-copy me-1"></i>Copy Permissions
+												</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+
+				<div class="col-md-12">
+					<div class="card tree-card">
+						<div
+							class="card-header bg-light d-flex justify-content-between align-items-center">
+							<h5 class="mb-0">
+								<i class="fas fa-sitemap me-2"></i> Menu Permissions
+							</h5>
+							<div class="d-flex gap-2">
+								<button id="btnSaveAll" class="btn btn-success d-none">
+									<i class="fas fa-save me-2"></i>Save Changes
+								</button>
+								<button id="btnExpandAll" class="btn btn-outline-secondary">
+									<i class="fas fa-expand-arrows-alt me-2"></i>Expand All
+								</button>
+								<button id="btnCollapseAll" class="btn btn-outline-secondary">
+									<i class="fas fa-compress-arrows-alt me-2"></i>Collapse All
+								</button>
+								<div id="treeStats" class="badge bg-secondary d-flex justify-content-center align-items-center">
+									<span id="totalMenus" clas="pe-1">0</span>
+								</div>
+							</div>
+
+						</div>
+						<div class="card-body p-0 position-relative">
+							<div id="loadingOverlay" class="loading-overlay d-none">
+								<div class="text-center">
+									<div class="spinner-border text-primary mb-2"></div>
+									<p class="text-muted">Loading menu tree...</p>
+								</div>
+							</div>
+
+							<div class="tree-header">
+								<div class="d-flex justify-content-between align-items-center">
+									<div>
+										<span class="fw-semibold">Quick Actions:</span>
+										<div class="form-check form-check-inline ms-3">
+											<input class="form-check-input" type="checkbox"
+												id="selectAllView"> <label class="form-check-label"
+												for="selectAllView">All View</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="checkbox"
+												id="selectAllAccess"> <label
+												class="form-check-label" for="selectAllAccess">All
+												Access</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="checkbox"
+												id="selectAllEdit"> <label class="form-check-label"
+												for="selectAllEdit">All Edit</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="checkbox"
+												id="selectAllDelete"> <label
+												class="form-check-label" for="selectAllDelete">All
+												Delete</label>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div id="menuTree" class="tree-container">
+								<div id="emptyState" class="text-center py-5">
+									<i class="fas fa-sitemap display-1 text-muted mb-3"></i>
+									<p class="text-muted">Select a role to view and manage menu
+										permissions</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div layout:fragment="modals">
+		<div class="modal fade" id="copyPermissionsModal" tabindex="-1">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">
+							<i class="fas fa-copy me-2"></i>Copy Permissions
+						</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+					<div class="modal-body">
+						<div class="mb-3">
+							<label class="form-label">Copy from current role to:</label> <select
+								id="targetRoleSelect" class="form-select">
+								<option value="">-- Select Target Role --</option>
+								<option th:each="role : ${roles}" th:value="${role.id}"
+									th:text="${role.name}"></option>
+							</select>
+						</div>
+						<div class="alert alert-warning">
+							<i class="fas fa-exclamation-triangle me-2"></i> This will
+							overwrite all existing permissions for the target role.
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary"
+							data-bs-dismiss="modal">Cancel</button>
+						<button type="button" id="btnConfirmCopy" class="btn btn-primary">Copy
+							Permissions</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div layout:fragment="scripts">
+		<script>
+        $(document).ready(function() {
+            let currentRoleId = null;
+            let menuTreeData = [];
+            let pendingChanges = new Map();
+
+            initEventListeners();
+
+            function initEventListeners() {
+                $('#roleSelect').change(function() {
+                    const roleId = $(this).val();
+                    if (roleId) {
+                        loadMenuTree(roleId);
+                    } else {
+                        resetTree();
+                    }
+                });
+
+                $('#btnExpandAll').click(expandAllNodes);
+                $('#btnCollapseAll').click(collapseAllNodes);
+
+                $('#btnSaveAll').click(saveAllChanges);
+
+                $('#btnCopyPermissions').click(function() {
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('copyPermissionsModal')).show();
+                });
+
+                $('#btnConfirmCopy').click(copyPermissions);
+
+                $('#selectAllView').change(toggleAllPermissions.bind(null, 'view'));
+                $('#selectAllAccess').change(toggleAllPermissions.bind(null, 'access'));
+                $('#selectAllEdit').change(toggleAllPermissions.bind(null, 'edit'));
+                $('#selectAllDelete').change(toggleAllPermissions.bind(null, 'delete'));
+            }
+
+            function loadMenuTree(roleId) {
+                currentRoleId = roleId;
+                pendingChanges.clear();
+
+                $('#loadingOverlay').removeClass('d-none');
+                $('#menuTree').html('');
+                $('#btnSaveAll').addClass('d-none');
+
+                const selectedOption = $('#roleSelect option:selected');
+                $('#selectedRoleName').text(selectedOption.text());
+                $('#roleInfo').removeClass('d-none');
+                $('#btnCopyPermissions').removeClass('d-none');
+
+                $.ajax({
+                    url: CONTEXT_PATH + 'menu-role-access/tree/' + roleId,
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        menuTreeData = data;
+                        renderTree(data);
+                        updateTreeStats(data);
+                    },
+                    error: function(xhr) {
+                        showError('Error loading menu tree');
+                    },
+                    complete: function() {
+                        $('#loadingOverlay').addClass('d-none');
+                    }
+                });
+            }
+
+            function renderTree(nodes, parentElement = $('#menuTree'), level = 0) {
+                if (nodes.length === 0) {
+                    parentElement.html('<div class="text-center py-5 text-muted">No menus found</div>');
+                    return;
+                }
+
+                const treeHtml = nodes.map(node => createTreeNodeHtml(node, level)).join('');
+                parentElement.html(treeHtml);
+
+                $('.node-toggle').off('click').click(toggleNode);
+                $('.permission-checkbox').off('change').change(handlePermissionChange);
+            }
+
+            function nodeHasChildren(node) {
+                return node.hasChildren || (Array.isArray(node.children) && node.children.length > 0);
+            }
+
+            function createTreeNodeHtml(node, level) {
+                const levelClass = level > 0 ? `child-level-${Math.min(level, 3)}` : '';
+                const hasChildren = nodeHasChildren(node);
+                const isExpanded = node.expanded;
+                const toggleClass = hasChildren ? (isExpanded ? '' : 'collapsed') : 'invisible';
+                const childrenVisible = hasChildren && isExpanded ? '' : 'd-none';
+
+                return `
+                    <div class="tree-node ${levelClass}" data-node-id="${node.id}" data-level="${level}">
+                        <div class="node-content">
+                            <div class="node-toggle ${toggleClass}" data-node-id="${node.id}">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="node-icon">
+                                <i class="${node.icon || 'fas fa-folder'}"></i>
+                            </div>
+                            <div class="node-info">
+                                <div class="node-title">${node.name}</div>
+                                <div class="node-url small">${node.url || ''}</div>
+                            </div>
+                            <div class="permission-checkboxes">
+                                <div class="permission-checkbox-item">
+                                    <div class="form-check mb-1">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" 
+                                               data-permission="view" data-menu-id="${node.id}"
+                                               ${node.canView ? 'checked' : ''}>
+                                    </div>
+                                    <span class="permission-label">View</span>
+                                </div>
+                                <div class="permission-checkbox-item">
+                                    <div class="form-check mb-1">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" 
+                                               data-permission="access" data-menu-id="${node.id}"
+                                               ${node.canAccess ? 'checked' : ''}>
+                                    </div>
+                                    <span class="permission-label">Access</span>
+                                </div>
+                                <div class="permission-checkbox-item">
+                                    <div class="form-check mb-1">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" 
+                                               data-permission="edit" data-menu-id="${node.id}"
+                                               ${node.canEdit ? 'checked' : ''}>
+                                    </div>
+                                    <span class="permission-label">Edit</span>
+                                </div>
+                                <div class="permission-checkbox-item">
+                                    <div class="form-check mb-1">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" 
+                                               data-permission="delete" data-menu-id="${node.id}"
+                                               ${node.canDelete ? 'checked' : ''}>
+                                    </div>
+                                    <span class="permission-label">Delete</span>
+                                </div>
+                            </div>
+                        </div>
+                        ${hasChildren ? `
+                            <div class="children-container ${childrenVisible}" data-parent-id="${node.id}">
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            function toggleNode() {
+                const nodeId = $(this).data('node-id');
+                const $toggle = $(this);
+                const $childrenContainer = $(this).closest('.tree-node').find('.children-container');
+
+                if ($toggle.hasClass('collapsed')) {
+                    $toggle.removeClass('collapsed');
+                    $childrenContainer.removeClass('d-none');
+
+                    if ($childrenContainer.children().length === 0) {
+                        const node = findNodeById(menuTreeData, nodeId);
+                        if (node && node.children) {
+                            const childrenHtml = node.children.map(child =>
+                                createTreeNodeHtml(child, getNodeLevel($toggle.closest('.tree-node')) + 1)
+                            ).join('');
+                            $childrenContainer.html(childrenHtml);
+
+                            $childrenContainer.find('.node-toggle').click(toggleNode);
+                            $childrenContainer.find('.permission-checkbox').change(handlePermissionChange);
+                        }
+                    }
+                } else {
+                    $toggle.addClass('collapsed');
+                    $childrenContainer.addClass('d-none');
+                }
+            }
+
+            function handlePermissionChange() {
+                const menuId = $(this).data('menu-id');
+                const permission = $(this).data('permission');
+                const isChecked = $(this).is(':checked');
+
+                if (!pendingChanges.has(menuId)) {
+                    const $node = $(this).closest('.tree-node');
+                    pendingChanges.set(menuId, {
+                        menuId: menuId,
+                        roleId: currentRoleId,
+                        canView: $node.find('.permission-checkbox[data-permission="view"]').is(':checked'),
+                        canAccess: $node.find('.permission-checkbox[data-permission="access"]').is(':checked'),
+                        canEdit: $node.find('.permission-checkbox[data-permission="edit"]').is(':checked'),
+                        canDelete: $node.find('.permission-checkbox[data-permission="delete"]').is(':checked')
+                    });
+                }
+
+                const change = pendingChanges.get(menuId);
+                change[`can${permission.charAt(0).toUpperCase() + permission.slice(1)}`] = isChecked;
+
+                const $checkboxContainer = $(this).closest('.permission-checkbox-item');
+                if (isChecked) {
+                    $checkboxContainer.find('.permission-label').addClass(`text-${getPermissionColor(permission)}`);
+                } else {
+                    $checkboxContainer.find('.permission-label').removeClass(`text-${getPermissionColor(permission)}`);
+                }
+
+                if (pendingChanges.size > 0) {
+                    $('#btnSaveAll').removeClass('d-none');
+                }
+            }
+
+            function saveAllChanges() {
+                if (pendingChanges.size === 0) return;
+
+                const changes = Array.from(pendingChanges.values());
+
+                const token = $('meta[name="_csrf"]').attr('content');
+                const header = $('meta[name="_csrf_header"]').attr('content');
+
+                $.ajax({
+                    url: CONTEXT_PATH + 'menu-role-access/save-bulk-permissions',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(changes),
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader(header, token);
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            showSuccess(response.message);
+                            pendingChanges.clear();
+                            $('#btnSaveAll').addClass('d-none');
+
+                            loadMenuTree(currentRoleId);
+                        } else {
+                            showError(response.message);
+                        }
+                    },
+                    error: function() {
+                        showError('Error saving permissions');
+                    }
+                });
+            }
+
+            function copyPermissions() {
+                const targetRoleId = $('#targetRoleSelect').val();
+                if (!targetRoleId) {
+                    showWarning('Please select a target role');
+                    return;
+                }
+
+                const token = $('meta[name="_csrf"]').attr('content');
+                const header = $('meta[name="_csrf_header"]').attr('content');
+
+                $.ajax({
+                    url: CONTEXT_PATH + 'menu-role-access/copy-permissions',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        sourceRoleId: currentRoleId,
+                        targetRoleId: targetRoleId
+                    }),
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader(header, token);
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            showSuccess(response.message);
+                            bootstrap.Modal.getOrCreateInstance(document.getElementById('copyPermissionsModal')).hide();
+                        } else {
+                            showError(response.message);
+                        }
+                    },
+                    error: function() {
+                        showError('Error copying permissions');
+                    }
+                });
+            }
+
+            function findNodeById(nodes, id) {
+                for (const node of nodes) {
+                    if (String(node.id) === String(id)) return node;
+                    if (node.children) {
+                        const found = findNodeById(node.children, id);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            }
+
+            function getNodeLevel($node) {
+                return parseInt($node.data('level') || 0);
+            }
+
+            function getPermissionColor(permission) {
+                const colors = {
+                    view: 'primary',
+                    access: 'success',
+                    edit: 'warning',
+                    delete: 'danger'
+                };
+                return colors[permission] || 'secondary';
+            }
+
+            function expandAllNodes() {
+                $('.node-toggle.collapsed').each(function() {
+                    $(this).click();
+                });
+            }
+
+            function collapseAllNodes() {
+                $('.node-toggle:not(.collapsed)').each(function() {
+                    if (!$(this).hasClass('invisible')) {
+                        $(this).click();
+                    }
+                });
+            }
+
+            function toggleAllPermissions(permission, e) {
+                const isChecked = $(e.target).is(':checked');
+                $(`.permission-checkbox[data-permission="${permission}"]`).prop('checked', isChecked).trigger('change');
+            }
+
+            function updateTreeStats(nodes) {
+                let total = 0;
+                function countNodes(nodeList) {
+                    total += nodeList.length;
+                    nodeList.forEach(node => {
+                        if (node.children) countNodes(node.children);
+                    });
+                }
+                countNodes(nodes);
+                $('#totalMenus').text(total);
+            }
+
+            function resetTree() {
+                currentRoleId = null;
+                menuTreeData = [];
+                pendingChanges.clear();
+                $('#menuTree').html('<div id="emptyState" class="text-center py-5">' +
+                    '<i class="fas fa-sitemap display-1 text-muted mb-3"></i>' +
+                    '<p class="text-muted">Select a role to view and manage menu permissions</p>' +
+                    '</div>');
+                $('#roleInfo').addClass('d-none');
+                $('#btnCopyPermissions').addClass('d-none');
+                $('#btnSaveAll').addClass('d-none');
+                $('#totalMenus').text('0');
+            }
+        });
+    </script>
+	</div>
+</body>
+</html>
